@@ -1,7 +1,7 @@
 import java.util.Map;
+import java.util.Set;
 
 public class CardPositions {
-
     public static final Map<Character, Integer> cardPositions = Map.ofEntries(
             Map.entry('2', 2),
             Map.entry('3', 3),
