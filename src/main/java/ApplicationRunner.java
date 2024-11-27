@@ -1,3 +1,5 @@
+import texasholdem.PokerHand;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -10,6 +12,9 @@ public class ApplicationRunner {
     public static void main(String[] args) {
 
         List<PokerHand> hands = new ArrayList<>();
+     /*   PokerHand pokerHand = (new PokerHand("2C 5D 8H 9C KC"));
+        System.out.println(pokerHand);*/
+
 
         // без комбинаций
         hands.add(new PokerHand("2C 5D 8H 9C KC"));
@@ -75,13 +80,14 @@ public class ApplicationRunner {
         hands.add(new PokerHand("9C TC JC QC KC"));
         hands.add(new PokerHand("TC JC QC KC AC"));
 
+    // Реализовать возможность сортировки рук по «силе» (рейтингу / рангу) от сильной к слабой:
 
         Collections.sort(hands);
         for (PokerHand hand:hands) {
             System.out.println(hand.toString());
         }
 
-    /*    PokerHand highCard = new PokerHand("2C 4D 7H TS KC");
+      /*  PokerHand highCard = new PokerHand("2C 4D 7H TS KC");
         System.out.println(highCard.toString());
 
         PokerHand onePair = new PokerHand("2C 4D AC 4C 8C");

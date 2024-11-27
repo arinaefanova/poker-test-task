@@ -8,7 +8,7 @@
 Описание
 1.	Реализовать класс для ранжирования покерных рук.
 Класс должен содержать конструктор, который принимает на вход строку, содержащую пять карт:
-PokerHand hand = new PokerHand("KS 2H 5C JD TD");
+texasholdem.PokerHand hand = new texasholdem.PokerHand("KS 2H 5C JD TD");
 Характеристики входной строки:
 •	В качестве разделителя используется пробел.
 •	Описание каждой карты состоит из двух символов:
@@ -17,14 +17,14 @@ PokerHand hand = new PokerHand("KS 2H 5C JD TD");
 
 2.	Реализовать возможность сортировки рук по «силе» (рейтингу / рангу) от сильной к слабой:
 
-ArrayList<PokerHand> hands = new ArrayList<PokerHand>();
-hands.add(new PokerHand("KS 2H 5C JD TD"));
-hands.add(new PokerHand("2C 3C AC 4C 5C"));
+ArrayList<texasholdem.PokerHand> hands = new ArrayList<texasholdem.PokerHand>();
+hands.add(new texasholdem.PokerHand("KS 2H 5C JD TD"));
+hands.add(new texasholdem.PokerHand("2C 3C AC 4C 5C"));
 Collections.sort(hands);
 
 Для упрощения считать, что туз в комбинациях стрит или стрит-флэш может быть только наивысшей картой.
 
-3.	Класс PokerHand должен быть покрыт unit-тестами (определение комбинаций и сравнение комбинаций).
+3.	Класс texasholdem.PokerHand должен быть покрыт unit-тестами (определение комбинаций и сравнение комбинаций).
 
 Результат
 Результат необходимо отправить на адрес tamara@siberteam.com архивом, либо выложить на github и прислать ссылку на проект.

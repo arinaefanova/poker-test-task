@@ -1,3 +1,5 @@
+package texasholdem;
+
 import java.util.*;
 import java.util.function.Function;
 
@@ -9,19 +11,14 @@ public class PokerHand implements Comparable<PokerHand> {
     private List<Map.Entry<Character, Integer>> combination;
     private List<Map.Entry<Character, Integer>> kickers;
 
-
     public PokerHand(String cardCombination) {
-        String[] splitCards = cardCombination.split("\\s");
-        if (splitCards.length != 5) {
-            throw new IllegalArgumentException("Poker Hand must contain exactly 5 cards.");
-        }
-        this.cards = splitCards;
+        this.cards = CardValidator.validatePokerHand(cardCombination);
         this.combination = new ArrayList<>();
         this.kickers = new ArrayList<>();
         calculateWeight();
     }
 
-    public void calculateWeight() {
+    private void calculateWeight() {
         this.handRanking = PokerHandUtils.evaluate(this);
         this.weight = handRanking.getWeight();
         Optional<Map.Entry<Character, Integer>> maxEntry = combination.stream()
@@ -34,53 +31,26 @@ public class PokerHand implements Comparable<PokerHand> {
         return comparator.compare(this, other);
     }
 
-    @Override
-    public String toString() {
-        return "PokerHand{" +
-                "cards=" + Arrays.toString(cards) +
-                ", handRanking=" + handRanking +
-                ", weight=" + weight +
-                ", combination=" + combination +
-                ", kickers=" + kickers +
-                '}';
+    void setCombination(List<Map.Entry<Character, Integer>> combination) {
+        this.combination = combination;
+        combination.sort((entry1, entry2) -> entry2.getValue().compareTo(entry1.getValue()));
     }
 
-    public void setKickers(List<Map.Entry<Character, Integer>> kickers) {
+    void setKickers(List<Map.Entry<Character, Integer>> kickers) {
         this.kickers = kickers;
     }
 
-    public void setCombination(List<Map.Entry<Character, Integer>> combination) {
-        combination.sort((entry1, entry2) -> entry2.getValue().compareTo(entry1.getValue()));
-        this.combination = combination;
-    }
-    public String[] getCards() {
-        return cards;
-    }
-
-    public List<Map.Entry<Character, Integer>> getKickers() {
-        return kickers;
-    }
-
-    public char getSuit(String card) {
+    char getSuit(String card) {
         if (card.length() != 2) {
             throw new IllegalArgumentException("Invalid card format: " + card);
         }
         return card.charAt(1);
     }
-
-    public char getRank(String card) {
+    char getRank(String card) {
         if (card.length() != 2) {
             throw new IllegalArgumentException("Invalid card format: " + card);
         }
         return card.charAt(0);
-    }
-
-    public Integer getWeight() {
-        return weight;
-    }
-
-    public List<Map.Entry<Character, Integer>> getCombination() {
-        return combination;
     }
 
     private Map<Character, Integer> getCounts(Function<String, Character> function) {
@@ -92,14 +62,44 @@ public class PokerHand implements Comparable<PokerHand> {
         return counts;
     }
 
-    public Map<Character, Integer> getRankCounts() {
+    Map<Character, Integer> getRankCounts() {
         return getCounts(this::getRank);
     }
 
-    public Map<Character, Integer> getSuitCounts() {
+    Map<Character, Integer> getSuitCounts() {
         return getCounts(this::getSuit);
     }
 
+    public String[] getCards() {
+        return cards;
+    }
+
+    public List<Map.Entry<Character, Integer>> getKickers() {
+        return kickers;
+    }
+
+    public Integer getWeight() {
+        return weight;
+    }
+
+    public List<Map.Entry<Character, Integer>> getCombination() {
+        return combination;
+    }
+
+    public HandRankings getHandRanking() {
+        return handRanking;
+    }
+
+    @Override
+    public String toString() {
+        return "utils.PokerHand{" +
+                "cards=" + Arrays.toString(cards) +
+                ", handRanking=" + handRanking +
+                ", weight=" + weight +
+                ", combination=" + combination +
+                ", kickers=" + kickers +
+                '}';
+    }
 }
 
 

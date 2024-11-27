@@ -1,3 +1,5 @@
+package texasholdem;
+
 import java.util.function.Predicate;
 
 public enum HandRankings {
@@ -20,12 +22,11 @@ public enum HandRankings {
         this.condition = condition;
     }
 
-    public boolean matches(PokerHand hand) {
+    boolean matches(PokerHand hand) {
         return condition.test(hand);
     }
 
     public int getWeight() {
         return weight;
     }
-
 }
