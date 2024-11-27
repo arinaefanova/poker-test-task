@@ -19,8 +19,21 @@ public class PokerHandTest {
         PokerHand withoutCombination1 = new PokerHand("KC 9D 8S 6H 5C");
         PokerHand withoutCombination2 = new PokerHand("AH 9D 8S 6H 5C");
 
-        assertTrue(withoutCombination1.compareTo(withoutCombination2) > 0, "First hand should be greater");
-        assertTrue(withoutCombination2.compareTo(withoutCombination1) < 0, "Second hand should be lesser");
+        assertTrue(withoutCombination1.compareTo(withoutCombination2) > 0,
+                "First hand should be lesser due to lower High Card (King vs Ace)");
+        assertTrue(withoutCombination2.compareTo(withoutCombination1) < 0,
+                "Second hand should be greater due to higher High Card (Ace vs King)");
+    }
+
+    @Test
+    void testCompareToSameHandsDifferentKickers() {
+        PokerHand fourOfAKindHand1 = new PokerHand("KH KD KC KS JC");
+        PokerHand fourOfAKindHand2 = new PokerHand("KH KD KC KS 3C");
+
+        assertTrue(fourOfAKindHand2.compareTo(fourOfAKindHand1) > 0,
+                "Hand with lower kicker (3) should rank lower than hand with higher kicker (Jack)");
+        assertTrue(fourOfAKindHand1.compareTo(fourOfAKindHand2) < 0,
+                "Hand with higher kicker (Jack) should rank higher than hand with lower kicker (3)");
     }
 
     @Test
@@ -45,7 +58,8 @@ public class PokerHandTest {
     void testCompareToWithNull() {
         PokerHand hand = new PokerHand("KH JD 9C 3S 2D");
 
-        assertThrows(NullPointerException.class, () -> hand.compareTo(null), "Comparing with null should throw NullPointerException");
+        assertThrows(NullPointerException.class, () -> hand.compareTo(null),
+                "Comparing with null should throw NullPointerException");
     }
 
     @Test
