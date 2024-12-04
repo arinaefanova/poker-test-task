@@ -7,6 +7,38 @@ import static texasholdem.HandRankings.*;
 public class PokerHandTest {
 
     @Test
+    void testEquals_sameCardsSameOrder() {
+        PokerHand hand1 = new PokerHand("AS KS QS JS TS");
+        PokerHand hand2 = new PokerHand("AS KS QS JS TS");
+
+        assertEquals(hand1, hand2, "Hands with the same cards in the same order should be equal");
+    }
+
+    @Test
+    void testHashCode_sameCardsSameOrder() {
+        PokerHand hand1 = new PokerHand("AS KS QS JS TS");
+        PokerHand hand2 = new PokerHand("AS KS QS JS TS");
+
+        assertEquals(hand1.hashCode(), hand2.hashCode(), "Hands with the same cards in the same order should be equal");
+    }
+
+    @Test
+    void testEquals_sameCardsDifferentOrder() {
+        PokerHand hand1 = new PokerHand("9D KC 6H 8S 5C");
+        PokerHand hand2 = new PokerHand("KC 9D 8S 6H 5C");
+
+        assertEquals(hand1, hand2, "Hands with the same cards in the same order should be equal");
+    }
+
+    @Test
+    void testHashCode_sameCardsDifferentOrder() {
+        PokerHand hand1 = new PokerHand("9D KC 6H 8S 5C");
+        PokerHand hand2 = new PokerHand("KC 9D 8S 6H 5C");
+
+        assertEquals(hand1.hashCode(), hand2.hashCode(), "Hands with the same cards in the same order should be equal");
+    }
+
+    @Test
     void testCompareToIdenticalHands() {
         PokerHand sameCard1 = new PokerHand("KC 9D 8S 6H 5C");
         PokerHand sameCard2 = new PokerHand("KC 9D 8S 6H 5C");

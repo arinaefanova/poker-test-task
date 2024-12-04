@@ -122,6 +122,21 @@ public class PokerHand implements Comparable<PokerHand> {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PokerHand pokerHand = (PokerHand) o;
+        Set<String> set1 = new HashSet<>(Arrays.asList(cards));
+        Set<String> set2 = new HashSet<>(Arrays.asList(pokerHand.cards));
+        return set1.equals(set2);
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashSet<>(Arrays.asList(cards)).hashCode();
+    }
+
+    @Override
     public String toString() {
         return "utils.PokerHand{" +
                 "cards=" + Arrays.toString(cards) +
