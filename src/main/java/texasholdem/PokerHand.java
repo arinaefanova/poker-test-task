@@ -5,7 +5,7 @@ import java.util.function.Function;
 
 public class PokerHand implements Comparable<PokerHand> {
 
-    private final String[] cards;
+    private final List<Card> cardsAtHand;
     private HandRankings handRanking;
     // The weight always consists of the combination weight + the highest card weight in the combination
     // (this is enough for most sorting and is done for code optimization)
@@ -20,7 +20,18 @@ public class PokerHand implements Comparable<PokerHand> {
     private Boolean isStraightCached = null;
 
     public PokerHand(String cardCombination) {
-        this.cards = CardValidator.validatePokerHand(cardCombination);
+        if (cardCombination == null || cardCombination.isBlank()) {
+            throw new IllegalArgumentException("Card combination cannot be null or empty.");
+        }
+
+        this.cardsAtHand = Arrays.stream(cardCombination.split("\\s+"))
+                .map(Card::new)
+                .toList();
+
+        if (this.cardsAtHand.size() != 5) {
+            throw new IllegalArgumentException("Poker Hand must contain exactly 5 cards.");
+        }
+
         this.combination = new ArrayList<>();
         this.kickers = new ArrayList<>();
         calculateWeight();
@@ -70,27 +81,25 @@ public class PokerHand implements Comparable<PokerHand> {
         this.isStraightCached = isStraight;
     }
 
-    char getSuit(String card) {
-        if (card.length() != 2) {
-            throw new IllegalArgumentException("Invalid card format: " + card);
-        }
-        return card.charAt(1);
+    char getSuit(Card card) {
+        return card.getCardSuit().getSuit();
     }
 
-    char getRank(String card) {
-        if (card.length() != 2) {
-            throw new IllegalArgumentException("Invalid card format: " + card);
-        }
-        return card.charAt(0);
+    char getRank(Card card) {
+        return card.getCardRank().getLetter();
     }
 
-    private Map<Character, Integer> getCounts(Function<String, Character> function) {
+    private Map<Character, Integer> getCounts(Function<Card, Character> function) {
         Map<Character, Integer> counts = new HashMap<>();
-        for (String card : cards) {
+        for (Card card : cardsAtHand) {
             char key = function.apply(card);
             counts.put(key, counts.getOrDefault(key, 0) + 1);
         }
         return counts;
+    }
+
+    public List<Card> getCardsAtHand() {
+        return cardsAtHand;
     }
 
     Map<Character, Integer> getRankCounts() {
@@ -99,10 +108,6 @@ public class PokerHand implements Comparable<PokerHand> {
 
     Map<Character, Integer> getSuitCounts() {
         return getCounts(this::getSuit);
-    }
-
-    public String[] getCards() {
-        return cards;
     }
 
     public List<Map.Entry<Character, Integer>> getKickers() {
@@ -126,20 +131,18 @@ public class PokerHand implements Comparable<PokerHand> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PokerHand pokerHand = (PokerHand) o;
-        Set<String> set1 = new HashSet<>(Arrays.asList(cards));
-        Set<String> set2 = new HashSet<>(Arrays.asList(pokerHand.cards));
-        return set1.equals(set2);
+        return new HashSet<>(this.cardsAtHand).equals(new HashSet<>(pokerHand.cardsAtHand));
     }
 
     @Override
     public int hashCode() {
-        return new HashSet<>(Arrays.asList(cards)).hashCode();
+        return new HashSet<>(cardsAtHand).hashCode();
     }
 
     @Override
     public String toString() {
         return "utils.PokerHand{" +
-                "cards=" + Arrays.toString(cards) +
+                "cards=" + cardsAtHand.toString() +
                 ", handRanking=" + handRanking +
                 ", weight=" + weight +
                 ", combination=" + combination +

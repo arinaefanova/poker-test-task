@@ -25,6 +25,19 @@ public enum CardRanks {
         this.weight = weight;
     }
 
+    public static boolean isValidRank(char rank) {
+        return Arrays.stream(CardRanks.values()).anyMatch(e -> e.getLetter() == rank);
+    }
+
+    public static CardRanks getByLetter( char letter){
+        return Arrays.stream(CardRanks.values())
+                .filter(e -> e.getLetter() == letter)
+                .findFirst()
+                .orElseThrow( () -> new IllegalArgumentException(
+                        "No card ranks with letter: " + letter
+                ));
+    }
+
     public static int getWeightByLetter(char letter){
         return Arrays.stream(CardRanks.values())
                 .filter(e -> e.getLetter() == letter)

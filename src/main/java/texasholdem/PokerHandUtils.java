@@ -158,7 +158,7 @@ class PokerHandUtils {
         if (pokerHand.isStraightCached() != null) {
             return pokerHand.isStraightCached();
         }
-        List<Integer> positions = Arrays.stream(pokerHand.getCards())
+        List<Integer> positions = pokerHand.getCardsAtHand().stream()
                 .map(card -> CardRanks.getWeightByLetter(pokerHand.getRank(card)))
                 .sorted()
                 .toList();
@@ -277,7 +277,7 @@ class PokerHandUtils {
      * @return true if the hand is a royal flush
      */
     static boolean isRoyalFlush(PokerHand pokerHand) {
-        Set<Character> cardSet = Arrays.stream(pokerHand.getCards())
+        Set<Character> cardSet = pokerHand.getCardsAtHand().stream()
                 .map(pokerHand::getRank)
                 .collect(Collectors.toSet());
         return isFlush(pokerHand) && cardSet.containsAll(ROYAL_FLUSH_RANKS);
