@@ -51,7 +51,7 @@ class PokerHandUtils {
     static List<Map.Entry<Character, Integer>> createCombination(Map<Character, Integer> rankCounts, Integer value) {
         return rankCounts.entrySet().stream()
                 .filter(entry -> Objects.equals(entry.getValue(), value))
-                .map(entry -> Map.entry(entry.getKey(), CardValidator.CARD_POSITIONS.get(entry.getKey())))
+                .map(entry -> Map.entry(entry.getKey(), CardRanks.getWeightByLetter(entry.getKey())))
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
@@ -65,7 +65,7 @@ class PokerHandUtils {
     static List<Map.Entry<Character, Integer>> createKickers(Map<Character, Integer> rankCounts, Integer value) {
         return rankCounts.entrySet().stream()
                 .filter(entry -> Objects.equals(entry.getValue(), value))
-                .map(entry -> Map.entry(entry.getKey(), CardValidator.CARD_POSITIONS.get(entry.getKey())))
+                .map(entry -> Map.entry(entry.getKey(), CardRanks.getWeightByLetter(entry.getKey())))
                 .sorted((a, b) -> Integer.compare(b.getValue(), a.getValue()))
                 .toList();
     }
@@ -159,7 +159,7 @@ class PokerHandUtils {
             return pokerHand.isStraightCached();
         }
         List<Integer> positions = Arrays.stream(pokerHand.getCards())
-                .map(card -> CardValidator.CARD_POSITIONS.get(pokerHand.getRank(card)))
+                .map(card -> CardRanks.getWeightByLetter(pokerHand.getRank(card)))
                 .sorted()
                 .toList();
 

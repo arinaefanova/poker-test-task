@@ -1,27 +1,8 @@
 package texasholdem;
 
-import java.util.Map;
-import java.util.Set;
+import java.util.Arrays;
 
 public class CardValidator {
-
-    public static final Map<Character, Integer> CARD_POSITIONS = Map.ofEntries(
-            Map.entry('2', 2),
-            Map.entry('3', 3),
-            Map.entry('4', 4),
-            Map.entry('5', 5),
-            Map.entry('6', 6),
-            Map.entry('7', 7),
-            Map.entry('8', 8),
-            Map.entry('9', 9),
-            Map.entry('T', 10),
-            Map.entry('J', 11),
-            Map.entry('Q', 12),
-            Map.entry('K', 13),
-            Map.entry('A', 14)
-    );
-
-    public static final Set<Character> CARD_SUITS = Set.of('S', 'H', 'D', 'C');
 
     public static String[] validatePokerHand(String cardCombination) {
         String[] splitCards = cardCombination.split("\\s+");
@@ -50,10 +31,10 @@ public class CardValidator {
     }
 
     public static boolean isValidRank(char rank) {
-        return CARD_POSITIONS.containsKey(rank);
+        return Arrays.stream(CardRanks.values()).anyMatch(e -> e.getLetter() == rank);
     }
 
     public static boolean isValidSuit(char suit) {
-        return CARD_SUITS.contains(suit);
+        return Arrays.stream(CardSuits.values()).anyMatch(e -> e.getSuit() == suit);
     }
 }
