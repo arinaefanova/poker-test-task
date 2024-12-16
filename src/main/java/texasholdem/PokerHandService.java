@@ -2,7 +2,18 @@ package texasholdem;
 import java.util.*;
 import java.util.stream.Collectors;
 
-class PokerHandUtils {
+public class PokerHandService {
+
+    private static PokerHandService pokerHandService;
+
+    private PokerHandService() {}
+
+    public static PokerHandService getPokerHandService() {
+        if (pokerHandService == null) {
+            pokerHandService = new PokerHandService();
+        }
+        return pokerHandService;
+    }
 
     private static final List<Integer> WHEEL_STRAIGHT_RANKS = List.of(2, 3, 4, 5, 14);
     private static final Set<Character> ROYAL_FLUSH_RANKS = Set.of('A', 'K', 'Q', 'J', 'T');
@@ -34,11 +45,18 @@ class PokerHandUtils {
      * @param hand The poker hand to evaluate
      * @return The ranking of the hand
      */
-     static HandRankings evaluate(PokerHand hand) {
+    public HandRankings evaluate(PokerHand hand) {
         return Arrays.stream(HandRankings.values())
+                .peek(type -> checkHandBefore(hand))
                 .filter(type -> type.matches(hand))
                 .findFirst()
                 .orElse(HandRankings.HIGH_CARD);
+    }
+
+    private void checkHandBefore(PokerHand pokerHand){
+          if (pokerHand.isAlreadyEstimated()){
+              throw new RuntimeException("This card was already estimated.");
+          }
     }
 
     /**
@@ -48,7 +66,7 @@ class PokerHandUtils {
      * @param value The frequency of the rank to create a combination (e.g., pair, set)
      * @return A list of map entries representing the combination (rank - position of the card)
      */
-    static List<Map.Entry<Character, Integer>> createCombination(Map<Character, Integer> rankCounts, Integer value) {
+     private List<Map.Entry<Character, Integer>> createCombination(Map<Character, Integer> rankCounts, Integer value) {
         return rankCounts.entrySet().stream()
                 .filter(entry -> Objects.equals(entry.getValue(), value))
                 .map(entry -> Map.entry(entry.getKey(), CardRanks.getWeightByLetter(entry.getKey())))
@@ -62,7 +80,7 @@ class PokerHandUtils {
      * @param value The frequency to filter by (e.g., 1 for single cards, 2 for pairs)
      * @return A sorted list of kickers represented by rank and position
      */
-    static List<Map.Entry<Character, Integer>> createKickers(Map<Character, Integer> rankCounts, Integer value) {
+     private List<Map.Entry<Character, Integer>> createKickers(Map<Character, Integer> rankCounts, Integer value) {
         return rankCounts.entrySet().stream()
                 .filter(entry -> Objects.equals(entry.getValue(), value))
                 .map(entry -> Map.entry(entry.getKey(), CardRanks.getWeightByLetter(entry.getKey())))
@@ -79,8 +97,9 @@ class PokerHandUtils {
      * @param pokerHand The poker hand to evaluate
      * @return true, since a high card is always present
      */
-    static boolean isHighCard(PokerHand pokerHand) {
-        pokerHand.setKickers(createKickers(pokerHand.getRankCounts(), RankFrequency.SINGLE));
+     boolean isHighCard(PokerHand pokerHand) {
+         checkHandBefore(pokerHand);
+         pokerHand.setKickers(createKickers(pokerHand.getRankCounts(), RankFrequency.SINGLE));
         return true;
     }
 
@@ -91,7 +110,8 @@ class PokerHandUtils {
      * @param pokerHand The poker hand to evaluate
      * @return true if the hand contains One Pair, false otherwise
      */
-    static boolean isOnePair(PokerHand pokerHand) {
+     boolean isOnePair(PokerHand pokerHand) {
+        checkHandBefore(pokerHand);
         Map<Character, Integer> rankCounts = pokerHand.getRankCounts();
         boolean hasOnePair = rankCounts.size() == UniqueRanks.HIGH_CARD_OR_ONE_PAIR
                 && rankCounts.containsValue(RankFrequency.PAIR);
@@ -111,7 +131,8 @@ class PokerHandUtils {
      * @param pokerHand The poker hand to evaluate
      * @return true if the hand contains Two Pairs, false otherwise
      */
-     static boolean isTwoPair(PokerHand pokerHand) {
+      boolean isTwoPair(PokerHand pokerHand) {
+        checkHandBefore(pokerHand);
         Map<Character, Integer> rankCounts = pokerHand.getRankCounts();
         boolean hasTwoPair = rankCounts.size() == UniqueRanks.TWO_PAIR_OR_SET
                 && rankCounts.containsValue(RankFrequency.PAIR);
@@ -131,7 +152,8 @@ class PokerHandUtils {
      * @param pokerHand The poker hand to evaluate
      * @return true if the hand contains a Set, false otherwise
      */
-     static boolean isSet(PokerHand pokerHand) {
+      boolean isSet(PokerHand pokerHand) {
+        checkHandBefore(pokerHand);
         Map<Character, Integer> rankCounts = pokerHand.getRankCounts();
         boolean hasSet = rankCounts.size() == UniqueRanks.TWO_PAIR_OR_SET
                 && pokerHand.getRankCounts().containsValue(RankFrequency.TRIPLE);
@@ -154,7 +176,8 @@ class PokerHandUtils {
      * @param pokerHand The poker hand to evaluate
      * @return true if the hand contains a Straight, false otherwise
      */
-    static boolean isStraight(PokerHand pokerHand) {
+     boolean isStraight(PokerHand pokerHand) {
+        checkHandBefore(pokerHand);
         if (pokerHand.isStraightCached() != null) {
             return pokerHand.isStraightCached();
         }
@@ -201,7 +224,8 @@ class PokerHandUtils {
      * @param pokerHand The poker hand to evaluate
      * @return true if the hand contains a Flush, false otherwise
      */
-    static boolean isFlush(PokerHand pokerHand) {
+     boolean isFlush(PokerHand pokerHand) {
+        checkHandBefore(pokerHand);
         if (pokerHand.isFlushCached() != null) {
             return pokerHand.isFlushCached();
         }
@@ -223,7 +247,8 @@ class PokerHandUtils {
      * @param pokerHand The poker hand to evaluate
      * @return true if the hand contains a Full House, false otherwise
      */
-    static boolean isFullHouse(PokerHand pokerHand) {
+     boolean isFullHouse(PokerHand pokerHand) {
+        checkHandBefore(pokerHand);
         Map<Character, Integer> rankCounts = pokerHand.getRankCounts();
         boolean hasFullHouse = rankCounts.size() == UniqueRanks.FULL_HOUSE_OR_FOUR_OF_A_KIND
                 && rankCounts.containsValue(RankFrequency.TRIPLE)
@@ -243,7 +268,8 @@ class PokerHandUtils {
      * @param pokerHand The poker hand to evaluate
      * @return true if the hand contains Four of a Kind, false otherwise
      */
-    static boolean isFourOfAKind(PokerHand pokerHand) {
+     boolean isFourOfAKind(PokerHand pokerHand) {
+        checkHandBefore(pokerHand);
         Map<Character, Integer> rankCounts = pokerHand.getRankCounts();
         boolean hasFourOfAKind = rankCounts.size() == UniqueRanks.FULL_HOUSE_OR_FOUR_OF_A_KIND
                 && rankCounts.containsValue(RankFrequency.QUADRUPLE);
@@ -264,7 +290,8 @@ class PokerHandUtils {
      * @param pokerHand The poker hand
      * @return true if the hand is a straight flush
      */
-    static boolean isStraightFlush(PokerHand pokerHand) {
+     boolean isStraightFlush(PokerHand pokerHand) {
+        checkHandBefore(pokerHand);
         return isFlush(pokerHand) && isStraight(pokerHand);
     }
 
@@ -276,7 +303,8 @@ class PokerHandUtils {
      * @param pokerHand The poker hand
      * @return true if the hand is a royal flush
      */
-    static boolean isRoyalFlush(PokerHand pokerHand) {
+     boolean isRoyalFlush(PokerHand pokerHand) {
+        checkHandBefore(pokerHand);
         Set<Character> cardSet = pokerHand.getCardsAtHand().stream()
                 .map(pokerHand::getRank)
                 .collect(Collectors.toSet());

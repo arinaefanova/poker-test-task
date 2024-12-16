@@ -3,16 +3,17 @@ package texasholdem;
 import java.util.function.Predicate;
 
 public enum HandRankings {
-    ROYAL_FLUSH(900, PokerHandUtils::isRoyalFlush),
-    STRAIGHT_FLUSH(800, PokerHandUtils::isStraightFlush),
-    FOUR_OF_A_KIND(700, PokerHandUtils::isFourOfAKind),
-    FULL_HOUSE(600, PokerHandUtils::isFullHouse),
-    FLUSH(500, PokerHandUtils::isFlush),
-    STRAIGHT(400, PokerHandUtils::isStraight),
-    SET(300, PokerHandUtils::isSet),
-    TWO_PAIR(200, PokerHandUtils::isTwoPair),
-    ONE_PAIR(100, PokerHandUtils::isOnePair),
-    HIGH_CARD(0, PokerHandUtils::isHighCard);
+    ROYAL_FLUSH(900, hand -> PokerHandService.getPokerHandService().isRoyalFlush(hand)),
+    STRAIGHT_FLUSH(800, hand -> PokerHandService.getPokerHandService().isStraightFlush(hand)),
+    FOUR_OF_A_KIND(700, hand -> PokerHandService.getPokerHandService().isFourOfAKind(hand)),
+    FULL_HOUSE(600, hand -> PokerHandService.getPokerHandService().isFullHouse(hand)),
+    FLUSH(500, hand -> PokerHandService.getPokerHandService().isFlush(hand)),
+    STRAIGHT(400, hand -> PokerHandService.getPokerHandService().isStraight(hand)),
+    SET(300,  hand -> PokerHandService.getPokerHandService().isSet(hand)),
+    TWO_PAIR(200, hand -> PokerHandService.getPokerHandService().isTwoPair(hand)),
+    ONE_PAIR(100, hand -> PokerHandService.getPokerHandService().isOnePair(hand)),
+    HIGH_CARD(0, hand -> PokerHandService.getPokerHandService().isHighCard(hand));
+
 
     private final int weight;
     private final Predicate<PokerHand> condition;

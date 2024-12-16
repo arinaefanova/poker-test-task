@@ -11,7 +11,7 @@ public class PokerHand implements Comparable<PokerHand> {
     // (this is enough for most sorting and is done for code optimization)
     // However, if both the combination and the highest card are identical,
     // the comparison will continue by the rank within the combination, and then by the rank of the kickers.
-    private Integer weight;
+    private Integer weight = -1;
     private List<Map.Entry<Character, Integer>> combination;
     private List<Map.Entry<Character, Integer>> kickers;
     // Cached result for whether this hand is a Flush.
@@ -31,7 +31,6 @@ public class PokerHand implements Comparable<PokerHand> {
         if (this.cardsAtHand.size() != 5) {
             throw new IllegalArgumentException("Poker Hand must contain exactly 5 cards.");
         }
-
         this.combination = new ArrayList<>();
         this.kickers = new ArrayList<>();
         calculateWeight();
@@ -44,11 +43,16 @@ public class PokerHand implements Comparable<PokerHand> {
      * Then, it finds the card with the highest value in the combination and adds its value to the hand's weight.
      */
     private void calculateWeight() {
-        this.handRanking = PokerHandUtils.evaluate(this);
+        PokerHandService pokerHandService = PokerHandService.getPokerHandService();
+        this.handRanking = pokerHandService.evaluate(this);
         this.weight = handRanking.getWeight();
         Optional<Map.Entry<Character, Integer>> maxEntry = combination.stream()
                 .max(Comparator.comparingInt(Map.Entry::getValue));
         maxEntry.ifPresent(characterIntegerEntry -> this.weight += characterIntegerEntry.getValue());
+    }
+
+    public boolean isAlreadyEstimated(){
+        return weight != -1;
     }
 
     public int compareTo(PokerHand other) {
@@ -65,20 +69,20 @@ public class PokerHand implements Comparable<PokerHand> {
         this.kickers = kickers;
     }
 
-    public Boolean isFlushCached() {
-        return isFlushCached;
+    public void setStraightCached(Boolean isStraight) {
+        this.isStraightCached = isStraight;
     }
 
     public void setFlushCached(Boolean isFlush) {
         this.isFlushCached = isFlush;
     }
 
-    public Boolean isStraightCached() {
-        return isStraightCached;
+    public Boolean isFlushCached() {
+        return isFlushCached;
     }
 
-    public void setStraightCached(Boolean isStraight) {
-        this.isStraightCached = isStraight;
+    public Boolean isStraightCached() {
+        return isStraightCached;
     }
 
     char getSuit(Card card) {

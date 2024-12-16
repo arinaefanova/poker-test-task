@@ -37,6 +37,14 @@ public class Card {
         return Objects.hash(cardRank, cardSuit);
     }
 
+    @Override
+    public String toString() {
+        return "Card{" +
+                "cardRank=" + cardRank +
+                ", cardSuit=" + cardSuit +
+                '}';
+    }
+
     public CardSuits getCardSuit() {
         return cardSuit;
     }
