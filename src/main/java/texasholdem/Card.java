@@ -3,8 +3,8 @@ package texasholdem;
 import java.util.Objects;
 
 public class Card {
-    private final CardRanks cardRank;
-    private final CardSuits cardSuit;
+    private final CardRank rank;
+    private final CardSuit suit;
 
     public Card(String card) {
         if (card.length() != 2) {
@@ -13,14 +13,8 @@ public class Card {
         char rank = card.charAt(0);
         char suit = card.charAt(1);
 
-        if (!CardRanks.isValidRank(rank)) {
-            throw new IllegalArgumentException("Invalid card rank: " + rank);
-        }
-        if (!CardSuits.isValidSuit(suit)) {
-            throw new IllegalArgumentException("Invalid card suit: " + suit);
-        }
-        this.cardRank = CardRanks.getByLetter(rank);
-        this.cardSuit = CardSuits.getByLetter(suit);
+        this.rank = CardRank.of(rank);
+        this.suit = CardSuit.of(suit);
     }
 
     @Override
@@ -28,28 +22,28 @@ public class Card {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Card card = (Card) o;
-        return Objects.equals(cardRank, card.cardRank) &&
-                Objects.equals(cardSuit, card.cardSuit);
+        return Objects.equals(rank, card.rank) &&
+                Objects.equals(suit, card.suit);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(cardRank, cardSuit);
+        return Objects.hash(rank, suit);
     }
 
     @Override
     public String toString() {
         return "Card{" +
-                "cardRank=" + cardRank +
-                ", cardSuit=" + cardSuit +
+                "cardRank=" + rank +
+                ", cardSuit=" + suit +
                 '}';
     }
 
-    public CardSuits getCardSuit() {
-        return cardSuit;
+    public CardSuit getSuit() {
+        return suit;
     }
 
-    public CardRanks getCardRank() {
-        return cardRank;
+    public CardRank getRank() {
+        return rank;
     }
 }

@@ -2,7 +2,7 @@ package texasholdem;
 
 import java.util.Arrays;
 
-public enum CardRanks {
+public enum CardRank {
     TWO('2', 2),
     THREE('3', 3),
     FOUR('4', 4),
@@ -20,28 +20,14 @@ public enum CardRanks {
     private final char letter;
     private final int weight;
 
-    CardRanks(char letter, int weight) {
+    CardRank(char letter, int weight) {
         this.letter = letter;
         this.weight = weight;
     }
 
-    public static boolean isValidRank(char rank) {
-        return Arrays.stream(CardRanks.values()).anyMatch(e -> e.getLetter() == rank);
-    }
-
-    public static CardRanks getByLetter( char letter){
-        return Arrays.stream(CardRanks.values())
+    public static CardRank of(char letter){
+        return Arrays.stream(CardRank.values())
                 .filter(e -> e.getLetter() == letter)
-                .findFirst()
-                .orElseThrow( () -> new IllegalArgumentException(
-                        "No card ranks with letter: " + letter
-                ));
-    }
-
-    public static int getWeightByLetter(char letter){
-        return Arrays.stream(CardRanks.values())
-                .filter(e -> e.getLetter() == letter)
-                .mapToInt(CardRanks::getWeight)
                 .findFirst()
                 .orElseThrow( () -> new IllegalArgumentException(
                         "No card ranks with letter: " + letter

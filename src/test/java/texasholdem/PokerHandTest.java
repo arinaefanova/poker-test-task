@@ -3,7 +3,7 @@ package texasholdem;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static texasholdem.HandRankings.*;
+import static texasholdem.HandRanking.*;
 
 public class PokerHandTest {
 

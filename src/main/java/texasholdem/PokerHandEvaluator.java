@@ -27,36 +27,94 @@ public class PokerHandEvaluator {
         public static final int QUADRUPLE = 4;
     }
 
-    private final List<CombinationRule> rules;
+    /**
+     * The method iterates through all possible pokerHand rankings and returns the first match it finds.
+     * If no other ranking matches, the hand is classified as **HIGH_CARD**.
+     *
+     * @param pokerHand The poker pokerHand to evaluate
+     * @return The highest-ranking hand that matches the given poker hand.
+     */
+    public HandRanking evaluate(PokerHand pokerHand) {
+        Map<Character, Integer> rankCounts = pokerHand.getRankCounts();
+        Map<Character, Integer> suitCounts = pokerHand.getSuitCounts();
+        List<Integer> sequence = getSequence(pokerHand);
 
-    public PokerHandEvaluator() {
-        this.rules = List.of(
-                new CombinationRule(this::isRoyalFlush, HandRankings.ROYAL_FLUSH),
-                new CombinationRule(this::isStraightFlush, HandRankings.STRAIGHT_FLUSH),
-                new CombinationRule(this::isFourOfAKind, HandRankings.FOUR_OF_A_KIND),
-                new CombinationRule(this::isFullHouse, HandRankings.FULL_HOUSE),
-                new CombinationRule(this::isFlush, HandRankings.FLUSH),
-                new CombinationRule(this::isStraight, HandRankings.STRAIGHT),
-                new CombinationRule(this::isSet, HandRankings.SET),
-                new CombinationRule(this::isTwoPair, HandRankings.TWO_PAIR),
-                new CombinationRule(this::isOnePair, HandRankings.ONE_PAIR),
-                new CombinationRule(this::isHighCard, HandRankings.HIGH_CARD)
-        );
+        boolean hasRoyalFlashRanks = ROYAL_FLUSH_RANKS.stream()
+                .allMatch(rank -> pokerHand.getCardsAtHand().stream()
+                        .map(pokerHand::getRank)
+                        .anyMatch(cardRank -> cardRank == rank));
+
+        boolean hasSequence = sequence != null;
+        boolean hasFlush = suitCounts.containsValue(SuitFrequency.FLUSH_CARDS_IN_SUIT);
+        int uniqueRanks = rankCounts.size();
+        boolean hasPair = rankCounts.containsValue(RankFrequency.PAIR);
+        boolean hasTriple = rankCounts.containsValue(RankFrequency.TRIPLE);
+        boolean hasQuadruple = rankCounts.containsValue(RankFrequency.QUADRUPLE);
+
+
+        if (hasRoyalFlashRanks && hasFlush){
+            return assignRoyalFlush(pokerHand, rankCounts);
+        }
+
+        if (hasSequence && hasFlush){
+            return assignStraightFlush(pokerHand, rankCounts);
+        } else if (hasSequence){
+            return assignStraight(pokerHand, sequence, rankCounts);
+        } else if (hasFlush){
+            return assignFlush(pokerHand, rankCounts);
+        }
+
+        if (uniqueRanks == UniqueRanks.FULL_HOUSE_OR_FOUR_OF_A_KIND) {
+            if (hasTriple && hasPair) {
+                return assignFullHouse(pokerHand, rankCounts);
+            }
+            if (hasQuadruple) {
+                return assignFourOfAKind(pokerHand, rankCounts);
+            }
+        }
+
+        if (uniqueRanks == UniqueRanks.TWO_PAIR_OR_SET) {
+            if (hasPair) {
+                return assignTwoPair(pokerHand, rankCounts);
+            }
+            if (hasTriple) {
+                return assignSet(pokerHand, rankCounts);
+            }
+        }
+
+        if (uniqueRanks == UniqueRanks.HIGH_CARD_OR_ONE_PAIR && hasPair) {
+            return assignOnePair(pokerHand, rankCounts);
+        }
+
+        return assignHighCard(pokerHand, rankCounts);
     }
 
     /**
-     * The method iterates through all possible hand rankings and returns the first match it finds.
-     * If no other hand ranking matches, it defaults to **HIGH_CARD**.
+     * Determines if the hand contains a sequential series of ranks.
+     * If the ranks form a valid straight or the special "wheel" straight, returns the sequence.
      *
-     * @param hand The poker hand to evaluate
-     * @return The ranking of the hand
+     * @param pokerHand The poker hand to evaluate.
+     * @return A list of integers representing the sequence of ranks, or null if no valid sequence is found.
      */
-    public HandRankings evaluate(PokerHand hand) {
-        return rules.stream()
-                .filter(rule -> rule.condition().test(hand))
-                .findFirst()
-                .map(CombinationRule::result)
-                .orElse(HandRankings.HIGH_CARD);
+    private List<Integer> getSequence(PokerHand pokerHand) {
+        List<Integer> sequence = pokerHand.getCardsAtHand().stream()
+                .map(card -> CardRank.of(pokerHand.getRank(card)).getWeight())
+                .sorted()
+                .toList();
+
+        boolean isSequential = true;
+        for (int i = 1; i < sequence.size(); i++) {
+            if (sequence.get(i) - sequence.get(i - 1) != 1) {
+                isSequential = false;
+                break;
+            }
+        }
+
+        if (!isSequential && !sequence.equals(WHEEL_STRAIGHT_RANKS)) {
+            return null;
+        }
+
+        return sequence;
     }
 
     /**
@@ -69,7 +127,7 @@ public class PokerHandEvaluator {
      private List<Map.Entry<Character, Integer>> createCombination(Map<Character, Integer> rankCounts, Integer value) {
         return rankCounts.entrySet().stream()
                 .filter(entry -> Objects.equals(entry.getValue(), value))
-                .map(entry -> Map.entry(entry.getKey(), CardRanks.getWeightByLetter(entry.getKey())))
+                .map(entry -> Map.entry(entry.getKey(), CardRank.of(entry.getKey()).getWeight()))
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
@@ -83,221 +141,165 @@ public class PokerHandEvaluator {
      private List<Map.Entry<Character, Integer>> createKickers(Map<Character, Integer> rankCounts, Integer value) {
         return rankCounts.entrySet().stream()
                 .filter(entry -> Objects.equals(entry.getValue(), value))
-                .map(entry -> Map.entry(entry.getKey(), CardRanks.getWeightByLetter(entry.getKey())))
+                .map(entry -> Map.entry(entry.getKey(), CardRank.of(entry.getKey()).getWeight()))
                 .sorted((a, b) -> Integer.compare(b.getValue(), a.getValue()))
                 .toList();
     }
 
     /**
-     * Determines if the given poker hand is a High Card.
+     * Returns the **High Card** ranking for the given hand and sets the kickers.
      * A High Card is simply the highest card in the hand, when no other combination is formed.
-     *
-     * This method populates the kickers, which are the single cards in the hand.
+     * All 5 cards are placed in the kickers.
      *
      * @param pokerHand The poker hand to evaluate
-     * @return true, since a high card is always present
+     * @param rankCounts A map of card ranks to their frequencies.
+     * @return The **HandRanking.HIGH_CARD**.
      */
-    private boolean isHighCard(PokerHand pokerHand) {
-         pokerHand.setKickers(createKickers(pokerHand.getRankCounts(), RankFrequency.SINGLE));
-        return true;
+    private HandRanking assignHighCard(PokerHand pokerHand, Map<Character, Integer> rankCounts  ) {
+        pokerHand.setKickers(createKickers(rankCounts, RankFrequency.SINGLE));
+        return HandRanking.HIGH_CARD;
     }
 
     /**
-     * Determines if the given poker hand contains One Pair.
+     * Assigns the **One Pair** combination to the given poker hand, setting the combination cards and kickers.
      * One Pair consists of two cards of the same rank and the remaining three cards are kickers.
      *
      * @param pokerHand The poker hand to evaluate
-     * @return true if the hand contains One Pair, false otherwise
+     * @param rankCounts A map of card ranks and their frequencies.
+     * @return The **HandRanking.ONE_PAIR**.
      */
-    private boolean isOnePair(PokerHand pokerHand) {
-        Map<Character, Integer> rankCounts = pokerHand.getRankCounts();
-        boolean hasOnePair = rankCounts.size() == UniqueRanks.HIGH_CARD_OR_ONE_PAIR
-                && rankCounts.containsValue(RankFrequency.PAIR);
+    private HandRanking assignOnePair(PokerHand pokerHand, Map<Character, Integer> rankCounts) {
+        pokerHand.setCombination(createCombination(rankCounts, RankFrequency.PAIR));
+        pokerHand.setKickers(createKickers(rankCounts, RankFrequency.SINGLE));
 
-        if (hasOnePair) {
-            pokerHand.setCombination(createCombination(rankCounts, RankFrequency.PAIR));
-            pokerHand.setKickers(createKickers(rankCounts, RankFrequency.SINGLE));
-        }
-
-        return hasOnePair;
+        return HandRanking.ONE_PAIR;
     }
 
     /**
-     * Determines if the given poker hand contains Two Pairs.
+     * Assigns the **Two Pair** combination to the given poker hand, setting the combination cards and kickers.
      * Two Pairs consists of two pairs of cards of the same rank and one kicker.
      *
      * @param pokerHand The poker hand to evaluate
-     * @return true if the hand contains Two Pairs, false otherwise
+     * @param rankCounts A map of card ranks and their frequencies.
+     * @return The **HandRanking.TWO_PAIR**
      */
-    private boolean isTwoPair(PokerHand pokerHand) {
-        Map<Character, Integer> rankCounts = pokerHand.getRankCounts();
-        boolean hasTwoPair = rankCounts.size() == UniqueRanks.TWO_PAIR_OR_SET
-                && rankCounts.containsValue(RankFrequency.PAIR);
+    private HandRanking assignTwoPair(PokerHand pokerHand, Map<Character, Integer> rankCounts) {
+        pokerHand.setCombination(createCombination(rankCounts, RankFrequency.PAIR));
+        pokerHand.setKickers(createKickers(rankCounts, RankFrequency.SINGLE));
 
-        if (hasTwoPair) {
-            pokerHand.setCombination(createCombination(rankCounts, RankFrequency.PAIR));
-            pokerHand.setKickers(createKickers(rankCounts, RankFrequency.SINGLE));
-        }
-
-        return hasTwoPair;
+        return HandRanking.TWO_PAIR;
     }
 
     /**
-     * Determines if the given poker hand contains a Set (Three of a Kind).
+     * Assigns the **Set** (Three of a Kind) combination to the given poker hand, setting the combination cards and kickers.
      * A Set consists of three cards of the same rank and the remaining two cards are kickers.
      *
      * @param pokerHand The poker hand to evaluate
-     * @return true if the hand contains a Set, false otherwise
+     * @param rankCounts A map of card ranks and their frequencies.
+     * @return The **HandRanking.SET**
      */
-    private boolean isSet(PokerHand pokerHand) {
-        Map<Character, Integer> rankCounts = pokerHand.getRankCounts();
-        boolean hasSet = rankCounts.size() == UniqueRanks.TWO_PAIR_OR_SET
-                && pokerHand.getRankCounts().containsValue(RankFrequency.TRIPLE);
-
-        if (hasSet) {
+    private HandRanking assignSet(PokerHand pokerHand, Map<Character, Integer> rankCounts) {
             pokerHand.setCombination(createCombination(rankCounts, RankFrequency.TRIPLE));
             pokerHand.setKickers(createKickers(rankCounts, RankFrequency.SINGLE));
-        }
-
-        return hasSet;
+        return HandRanking.SET;
     }
 
     /**
-     * Determines if the given poker hand contains a Straight.
-     * A Straight consists of five consecutive cards of any suit.
-     *
-     * This method checks if the card positions in the hand form a consecutive sequence,
-     * or if the hand is a "wheel straight" (Ace through 5).
+     * Assigns the **Straight** combination to the given poker hand, setting the combination cards.
+     * A Straight consists of five consecutive cards of any suit, or a "wheel straight" (Ace through 5).
+     * All 5 cards are placed in the combination, with no kickers.
      *
      * @param pokerHand The poker hand to evaluate
-     * @return true if the hand contains a Straight, false otherwise
+     * @param sequence A list representing the sequence of card ranks.
+     * @param rankCounts A map of card ranks and their frequencies.
+     * @return The **HandRanking.STRAIGHT**
      */
-    private boolean isStraight(PokerHand pokerHand) {
-        if (pokerHand.isStraightCached() != null) {
-            return pokerHand.isStraightCached();
-        }
-        List<Integer> positions = pokerHand.getCardsAtHand().stream()
-                .map(card -> CardRanks.getWeightByLetter(pokerHand.getRank(card)))
-                .sorted()
-                .toList();
+    private HandRanking assignStraight(PokerHand pokerHand, List<Integer> sequence, Map<Character, Integer> rankCounts) {
+        List<Map.Entry<Character, Integer>> combination = createCombination(rankCounts, 1);
 
-        boolean regularStraight = true;
-        for (int i = 1; i < positions.size(); i++) {
-            if (positions.get(i) - positions.get(i - 1) != 1) {
-                regularStraight = false;
-                break;
-            }
+        if (sequence.equals(WHEEL_STRAIGHT_RANKS)) {
+            combination.stream()
+                    .filter(entry -> entry.getKey() == 'A')
+                    .findFirst()
+                    .ifPresent(entry -> combination.replaceAll(e ->
+                            e.getKey() == 'A' ? new AbstractMap.SimpleEntry<>(e.getKey(), 1) : e));
         }
 
-        boolean wheelStraight = positions.equals(WHEEL_STRAIGHT_RANKS);
-        boolean hasStraight = regularStraight || wheelStraight;
+        pokerHand.setCombination(combination);
 
-        if (regularStraight || wheelStraight) {
-            Map<Character, Integer> rankCounts = pokerHand.getRankCounts();
-            List<Map.Entry<Character, Integer>> combination = createCombination(rankCounts, 1);
-
-            if (wheelStraight) {
-                combination.stream()
-                        .filter(entry -> entry.getKey() == 'A')
-                        .findFirst()
-                        .ifPresent(entry -> combination.replaceAll(e ->
-                                e.getKey() == 'A' ? new AbstractMap.SimpleEntry<>(e.getKey(), 1) : e));
-            }
-            pokerHand.setCombination(combination);
-        }
-
-        pokerHand.setStraightCached(hasStraight);
-        return hasStraight;
+        return HandRanking.STRAIGHT;
     }
 
     /**
-     * Determines if the given poker hand contains a Flush.
+     * Assigns the **Flush** combination to the given poker hand, setting the combination cards.
      * A Flush consists of five cards of the same suit, but not in a sequence.
-     *
-     * This method checks if there are 5 cards of the same suit and sets the combination accordingly.
+     * All 5 cards are placed in the combination, with no kickers.
      *
      * @param pokerHand The poker hand to evaluate
-     * @return true if the hand contains a Flush, false otherwise
+     * @param rankCounts A map of card ranks and their frequencies.
+     * @return The **HandRanking.FLUSH**
      */
-    private boolean isFlush(PokerHand pokerHand) {
-        if (pokerHand.isFlushCached() != null) {
-            return pokerHand.isFlushCached();
-        }
-        Map<Character, Integer> suitCounts = pokerHand.getSuitCounts();
-        boolean hasFlush = suitCounts.containsValue(SuitFrequency.FLUSH_CARDS_IN_SUIT);
+    private HandRanking assignFlush(PokerHand pokerHand, Map<Character, Integer> rankCounts) {
+        pokerHand.setCombination(createCombination(rankCounts, RankFrequency.SINGLE));
 
-        if (hasFlush) {
-            Map<Character, Integer> rankCounts = pokerHand.getRankCounts();
-            pokerHand.setCombination(createCombination(rankCounts, RankFrequency.SINGLE));
-        }
-        pokerHand.setFlushCached(hasFlush);
-        return hasFlush;
+        return HandRanking.FLUSH;
     }
 
     /**
-     * Determines if the given poker hand contains a Full House.
+     * Assigns the **Full House** combination to the given poker hand, setting the combination cards and kickers.
      * A Full House consists of three cards of one rank and two cards of another rank.
      *
      * @param pokerHand The poker hand to evaluate
-     * @return true if the hand contains a Full House, false otherwise
+     * @param rankCounts A map of card ranks and their frequencies.
+     * @return The **HandRanking.FULL_HOUSE**
      */
-    private boolean isFullHouse(PokerHand pokerHand) {
-        Map<Character, Integer> rankCounts = pokerHand.getRankCounts();
-        boolean hasFullHouse = rankCounts.size() == UniqueRanks.FULL_HOUSE_OR_FOUR_OF_A_KIND
-                && rankCounts.containsValue(RankFrequency.TRIPLE)
-                && rankCounts.containsValue(RankFrequency.PAIR);
+    private HandRanking assignFullHouse(PokerHand pokerHand, Map<Character, Integer> rankCounts) {
+        pokerHand.setCombination(createCombination(rankCounts, RankFrequency.TRIPLE));
+        pokerHand.setKickers(createKickers(rankCounts, RankFrequency.PAIR));
 
-        if (hasFullHouse) {
-            pokerHand.setCombination(createCombination(rankCounts, RankFrequency.TRIPLE));
-            pokerHand.setKickers(createKickers(rankCounts, RankFrequency.PAIR));
-        }
-        return hasFullHouse;
+        return HandRanking.FULL_HOUSE;
     }
 
     /**
-     * Determines if the given poker hand contains Four of a Kind.
+     * Assigns the **Four Of A Kind** combination to the given poker hand, setting the combination cards and kickers.
      * Four of a Kind consists of four cards of the same rank and one kicker card.
      *
      * @param pokerHand The poker hand to evaluate
-     * @return true if the hand contains Four of a Kind, false otherwise
+     * @param rankCounts A map of card ranks and their frequencies.
+     * @return The **HandRanking.FOUR_OF_A_KIND**
      */
-    private boolean isFourOfAKind(PokerHand pokerHand) {
-        Map<Character, Integer> rankCounts = pokerHand.getRankCounts();
-        boolean hasFourOfAKind = rankCounts.size() == UniqueRanks.FULL_HOUSE_OR_FOUR_OF_A_KIND
-                && rankCounts.containsValue(RankFrequency.QUADRUPLE);
+    private HandRanking assignFourOfAKind(PokerHand pokerHand, Map<Character, Integer> rankCounts) {
+        pokerHand.setCombination(createCombination(rankCounts, RankFrequency.QUADRUPLE));
+        pokerHand.setKickers(createKickers(rankCounts, RankFrequency.SINGLE));
 
-        if (hasFourOfAKind) {
-            pokerHand.setCombination(createCombination(rankCounts, RankFrequency.QUADRUPLE));
-            pokerHand.setKickers(createKickers(rankCounts, RankFrequency.SINGLE));
-        }
-
-        return hasFourOfAKind;
+        return HandRanking.FOUR_OF_A_KIND;
     }
 
     /**
-     * This method first checks if the hand is a Flush and a Straight, and if both conditions are satisfied, it returns true.
-     * Both methods (isFlush and isStraight) use caching to avoid redundant calculations.
+     * Assigns the **Straight Flush** combination to the given poker hand, setting the combination cards.
+     * A Straight Flush consists of five consecutive cards of the same suit.
      * All 5 cards are placed in the combination, with no kickers.
      *
      * @param pokerHand The poker hand
-     * @return true if the hand is a straight flush
+     * @param rankCounts A map of card ranks and their frequencies.
+     * @return The **HandRanking.STRAIGHT_FLUSH**
      */
-    private boolean isStraightFlush(PokerHand pokerHand) {
-        return isFlush(pokerHand) && isStraight(pokerHand);
+    private HandRanking assignStraightFlush(PokerHand pokerHand, Map<Character, Integer> rankCounts) {
+        pokerHand.setCombination(createCombination(rankCounts, RankFrequency.SINGLE));
+        return HandRanking.STRAIGHT_FLUSH;
     }
 
     /**
-     * This method checks if the hand is a Flush and whether it contains all the ranks of a Royal Flush
+     * Assigns the **Royal Flush** combination to the given poker hand, setting the combination cards.
      * (a straight flush from 10 to Ace).
      * All 5 cards are placed in the combination, with no kickers.
      *
      * @param pokerHand The poker hand
-     * @return true if the hand is a royal flush
+     * @param rankCounts A map of card ranks and their frequencies.
+     * @return The **HandRanking.ROYAL_FLUSH**
      */
-    private boolean isRoyalFlush(PokerHand pokerHand) {
-        Set<Character> cardSet = pokerHand.getCardsAtHand().stream()
-                .map(pokerHand::getRank)
-                .collect(Collectors.toSet());
-        return isFlush(pokerHand) && cardSet.containsAll(ROYAL_FLUSH_RANKS);
+    private HandRanking assignRoyalFlush(PokerHand pokerHand, Map<Character, Integer> rankCounts) {
+        pokerHand.setCombination(createCombination(rankCounts, RankFrequency.SINGLE));
+        return HandRanking.ROYAL_FLUSH;
     }
 }

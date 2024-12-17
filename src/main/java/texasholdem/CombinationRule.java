@@ -2,6 +2,6 @@ package texasholdem;
 
 import java.util.function.Predicate;
 
-public record CombinationRule(Predicate<PokerHand> condition, HandRankings result) {
+public record CombinationRule(Predicate<PokerHand> condition, HandRanking result) {
 
 }

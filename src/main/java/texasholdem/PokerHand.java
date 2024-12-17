@@ -2,29 +2,28 @@ package texasholdem;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 
 public class PokerHand implements Comparable<PokerHand> {
 
     private final List<Card> cardsAtHand;
-    private HandRankings handRanking;
+    private HandRanking handRanking;
     // The weight always consists of the combination weight + the highest card weight in the combination
     // (this is enough for most sorting and is done for code optimization)
     // However, if both the combination and the highest card are identical,
     // the comparison will continue by the rank within the combination, and then by the rank of the kickers.
-    private Integer weight = -1;
+    private Integer weight;
     private List<Map.Entry<Character, Integer>> combination;
     private List<Map.Entry<Character, Integer>> kickers;
-    // Cached result for whether this hand is a Flush.
-    private Boolean isFlushCached = null;
-    // Cached result for whether this hand is a Straight Flush.
-    private Boolean isStraightCached = null;
+
+    private static final Pattern PATTERN = Pattern.compile("\\s+");
 
     public PokerHand(String cardCombination) {
         if (cardCombination == null || cardCombination.isBlank()) {
             throw new IllegalArgumentException("Card combination cannot be null or empty.");
         }
 
-        this.cardsAtHand = Arrays.stream(cardCombination.split("\\s+"))
+        this.cardsAtHand = Arrays.stream(PATTERN.split(cardCombination))
                 .map(Card::new)
                 .toList();
 
@@ -65,28 +64,12 @@ public class PokerHand implements Comparable<PokerHand> {
         this.kickers = kickers;
     }
 
-    void setStraightCached(Boolean isStraight) {
-        this.isStraightCached = isStraight;
-    }
-
-    void setFlushCached(Boolean isFlush) {
-        this.isFlushCached = isFlush;
-    }
-
-    Boolean isFlushCached() {
-        return isFlushCached;
-    }
-
-    Boolean isStraightCached() {
-        return isStraightCached;
-    }
-
     char getSuit(Card card) {
-        return card.getCardSuit().getSuit();
+        return card.getSuit().getSuit();
     }
 
     char getRank(Card card) {
-        return card.getCardRank().getLetter();
+        return card.getRank().getLetter();
     }
 
     private Map<Character, Integer> getCounts(Function<Card, Character> function) {
@@ -122,7 +105,7 @@ public class PokerHand implements Comparable<PokerHand> {
         return combination;
     }
 
-    public HandRankings getHandRanking() {
+    public HandRanking getHandRanking() {
         return handRanking;
     }
 

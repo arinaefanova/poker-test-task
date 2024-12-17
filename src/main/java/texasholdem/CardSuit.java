@@ -2,7 +2,7 @@ package texasholdem;
 
 import java.util.Arrays;
 
-public enum CardSuits {
+public enum CardSuit {
     SPADES('S'),
     HEARTS('H'),
     DIAMONDS('D'),
@@ -10,16 +10,12 @@ public enum CardSuits {
 
     private final char suit;
 
-    CardSuits(char suit){
+    CardSuit(char suit){
         this.suit = suit;
     }
 
-    public static boolean isValidSuit(char suit) {
-        return Arrays.stream(CardSuits.values()).anyMatch(e -> e.getSuit() == suit);
-    }
-
-    public static CardSuits getByLetter( char letter){
-        return Arrays.stream(CardSuits.values())
+    public static CardSuit of(char letter){
+        return Arrays.stream(CardSuit.values())
                 .filter(e -> e.getSuit() == letter)
                 .findFirst()
                 .orElseThrow( () -> new IllegalArgumentException(

@@ -1,6 +1,6 @@
 package texasholdem;
 
-public enum HandRankings {
+public enum HandRanking {
     ROYAL_FLUSH(900),
     STRAIGHT_FLUSH(800),
     FOUR_OF_A_KIND(700),
@@ -14,7 +14,7 @@ public enum HandRankings {
 
     private final int weight;
 
-    HandRankings(int weight) {
+    HandRanking(int weight) {
         this.weight = weight;
     }
 
