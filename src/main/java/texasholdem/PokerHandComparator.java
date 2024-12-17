@@ -6,6 +6,12 @@ import java.util.Map;
 
 public class PokerHandComparator implements Comparator<PokerHand> {
 
+    private final PokerHandEvaluator pokerHandEvaluator;
+
+    public PokerHandComparator() {
+        this.pokerHandEvaluator = new PokerHandEvaluator();
+    }
+
     /**
      * Compares two poker hands based on their overall ranking (weight).
      *
@@ -20,11 +26,20 @@ public class PokerHandComparator implements Comparator<PokerHand> {
      */
     @Override
     public int compare(PokerHand hand1, PokerHand hand2) {
+        checkEvaluation(hand1);
+        checkEvaluation(hand2);
+
         int compareByCombination = hand2.getWeight().compareTo(hand1.getWeight());
         if (compareByCombination != 0) {
             return compareByCombination;
         }
         return compareByHighCards(hand1, hand2);
+    }
+
+    public void checkEvaluation(PokerHand hand){
+        if (hand.getWeight() == -1){
+            pokerHandEvaluator.evaluate(hand);
+        }
     }
 
     /**

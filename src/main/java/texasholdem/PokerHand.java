@@ -43,16 +43,12 @@ public class PokerHand implements Comparable<PokerHand> {
      * Then, it finds the card with the highest value in the combination and adds its value to the hand's weight.
      */
     private void calculateWeight() {
-        PokerHandService pokerHandService = PokerHandService.getPokerHandService();
-        this.handRanking = pokerHandService.evaluate(this);
+        PokerHandEvaluator pokerHandEvaluator = new PokerHandEvaluator();
+        this.handRanking = pokerHandEvaluator.evaluate(this);
         this.weight = handRanking.getWeight();
         Optional<Map.Entry<Character, Integer>> maxEntry = combination.stream()
                 .max(Comparator.comparingInt(Map.Entry::getValue));
         maxEntry.ifPresent(characterIntegerEntry -> this.weight += characterIntegerEntry.getValue());
-    }
-
-    public boolean isAlreadyEstimated(){
-        return weight != -1;
     }
 
     public int compareTo(PokerHand other) {
@@ -69,19 +65,19 @@ public class PokerHand implements Comparable<PokerHand> {
         this.kickers = kickers;
     }
 
-    public void setStraightCached(Boolean isStraight) {
+    void setStraightCached(Boolean isStraight) {
         this.isStraightCached = isStraight;
     }
 
-    public void setFlushCached(Boolean isFlush) {
+    void setFlushCached(Boolean isFlush) {
         this.isFlushCached = isFlush;
     }
 
-    public Boolean isFlushCached() {
+    Boolean isFlushCached() {
         return isFlushCached;
     }
 
-    public Boolean isStraightCached() {
+    Boolean isStraightCached() {
         return isStraightCached;
     }
 
