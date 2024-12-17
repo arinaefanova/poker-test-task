@@ -28,11 +28,12 @@ public class PokerHandEvaluator {
     }
 
     /**
-     * The method iterates through all possible pokerHand rankings and returns the first match it finds.
+     * The method checks the hand against all possible poker rankings, in order of priority.
+     * If a matching ranking is found, it returns the corresponding hand ranking.
      * If no other ranking matches, the hand is classified as **HIGH_CARD**.
      *
      * @param pokerHand The poker pokerHand to evaluate
-     * @return The highest-ranking hand that matches the given poker hand.
+     * @return The highest-ranking hand that matches the given poker hand, or **HIGH_CARD** if no other ranking matches.
      */
     public HandRanking evaluate(PokerHand pokerHand) {
         Map<Character, Integer> rankCounts = pokerHand.getRankCounts();
@@ -155,7 +156,7 @@ public class PokerHandEvaluator {
      * @param rankCounts A map of card ranks to their frequencies.
      * @return The **HandRanking.HIGH_CARD**.
      */
-    private HandRanking assignHighCard(PokerHand pokerHand, Map<Character, Integer> rankCounts  ) {
+    private HandRanking assignHighCard(PokerHand pokerHand, Map<Character, Integer> rankCounts) {
         pokerHand.setKickers(createKickers(rankCounts, RankFrequency.SINGLE));
         return HandRanking.HIGH_CARD;
     }
