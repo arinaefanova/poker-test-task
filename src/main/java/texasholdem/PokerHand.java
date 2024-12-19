@@ -45,9 +45,9 @@ public class PokerHand implements Comparable<PokerHand> {
         this.weight = handRanking.getWeight();
 
         Optional<Card> maxCard = combination.stream()
-                .max(Comparator.comparingInt(card -> card.getRank().getWeight()));
+                .max(Comparator.comparingInt(Card::getWeight));
 
-        maxCard.ifPresent(card -> this.weight += card.getRank().getWeight());
+        maxCard.ifPresent(card -> this.weight += card.getWeight());
     }
 
     public int compareTo(PokerHand other) {
