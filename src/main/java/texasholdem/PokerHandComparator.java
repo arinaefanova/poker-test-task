@@ -2,8 +2,6 @@ package texasholdem;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-
 public class PokerHandComparator implements Comparator<PokerHand> {
 
     /**
@@ -39,21 +37,21 @@ public class PokerHandComparator implements Comparator<PokerHand> {
      *         or 0 if both hands are the same based on their high cards and kickers.
      */
     private int compareByHighCards(PokerHand hand1, PokerHand hand2) {
-        List<Map.Entry<Character, Integer>> combination1 = hand1.getCombination();
-        List<Map.Entry<Character, Integer>> combination2 = hand2.getCombination();
+        List<Card> combination1 = hand1.getCombination();
+        List<Card> combination2 = hand2.getCombination();
 
         for (int i = 0; i < combination1.size(); i++) {
-            int comparison = combination1.get(i).getValue().compareTo(combination2.get(i).getValue());
+            int comparison = combination1.get(i).compareTo(combination2.get(i));
             if (comparison != 0) {
                 return comparison;
             }
         }
 
-        List<Map.Entry<Character, Integer>> kickers1 = hand1.getKickers();
-        List<Map.Entry<Character, Integer>> kickers2 = hand2.getKickers();
+        List<Card> kickers1 = hand1.getKickers();
+        List<Card> kickers2 = hand2.getKickers();
 
         for (int i = 0; i < kickers1.size(); i++) {
-            int comparison = kickers2.get(i).getValue().compareTo(kickers1.get(i).getValue());
+            int comparison = kickers2.get(i).compareTo(kickers1.get(i));
             if (comparison != 0) {
                 return comparison;
             }

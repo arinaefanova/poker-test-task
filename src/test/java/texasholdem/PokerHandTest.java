@@ -8,7 +8,7 @@ import static texasholdem.HandRanking.*;
 public class PokerHandTest {
 
     @Test
-    void testEquals_sameCardsSameOrder() {
+    void compareSameCardsWithSameOrder() {
         PokerHand hand1 = new PokerHand("AS KS QS JS TS");
         PokerHand hand2 = new PokerHand("AS KS QS JS TS");
 
@@ -16,7 +16,7 @@ public class PokerHandTest {
     }
 
     @Test
-    void testHashCode_sameCardsSameOrder() {
+    void compareHashCodeOfSameCardsWithSameOrder() {
         PokerHand hand1 = new PokerHand("AS KS QS JS TS");
         PokerHand hand2 = new PokerHand("AS KS QS JS TS");
 
@@ -24,7 +24,7 @@ public class PokerHandTest {
     }
 
     @Test
-    void testEquals_sameCardsDifferentOrder() {
+    void compareSameCardsWithDifferentOrder() {
         PokerHand hand1 = new PokerHand("9D KC 6H 8S 5C");
         PokerHand hand2 = new PokerHand("KC 9D 8S 6H 5C");
 
@@ -32,7 +32,15 @@ public class PokerHandTest {
     }
 
     @Test
-    void testNotEquals_differentCards() {
+    void compareHashCodeOfSameCardsWithDifferentOrder() {
+        PokerHand hand1 = new PokerHand("9D KC 6H 8S 5C");
+        PokerHand hand2 = new PokerHand("KC 9D 8S 6H 5C");
+
+        assertEquals(hand1.hashCode(), hand2.hashCode(), "Hands with the same cards in the same order should be equal");
+    }
+
+    @Test
+    void compareDifferentCards() {
         PokerHand hand1 = new PokerHand("9D KC 6H 3S 5C");
         PokerHand hand2 = new PokerHand("KC TS 8S 6H 5C");
 
@@ -40,7 +48,7 @@ public class PokerHandTest {
     }
 
     @Test
-    void testHashCode_differentCards() {
+    void compareHashCodeOfDifferentCards() {
         PokerHand hand1 = new PokerHand("9D KC 6H 3S 5C");
         PokerHand hand2 = new PokerHand("KC TS 8S 6H 5C");
 
@@ -48,15 +56,7 @@ public class PokerHandTest {
     }
 
     @Test
-    void testHashCode_sameCardsDifferentOrder() {
-        PokerHand hand1 = new PokerHand("9D KC 6H 8S 5C");
-        PokerHand hand2 = new PokerHand("KC 9D 8S 6H 5C");
-
-        assertEquals(hand1.hashCode(), hand2.hashCode(), "Hands with the same cards in the same order should be equal");
-    }
-
-    @Test
-    void testCompareToIdenticalHands() {
+    void compareIdenticalHands() {
         PokerHand sameCard1 = new PokerHand("KC 9D 8S 6H 5C");
         PokerHand sameCard2 = new PokerHand("KC 9D 8S 6H 5C");
 
@@ -64,7 +64,7 @@ public class PokerHandTest {
     }
 
     @Test
-    void testCompareToDifferentHandsSameRank() {
+    void compareDifferentHandsWithoutCombination() {
         PokerHand withoutCombination1 = new PokerHand("KC 9D 8S 6H 5C");
         PokerHand withoutCombination2 = new PokerHand("AH 9D 8S 6H 5C");
 
@@ -75,7 +75,7 @@ public class PokerHandTest {
     }
 
     @Test
-    void testCompareToSameHandsDifferentKickers() {
+    void compareSameHandsWithDifferentKickers() {
         PokerHand fourOfAKindHand1 = new PokerHand("KH KD KC KS JC");
         PokerHand fourOfAKindHand2 = new PokerHand("KH KD KC KS 3C");
 
@@ -86,7 +86,7 @@ public class PokerHandTest {
     }
 
     @Test
-    void testCompareToDifferentHandsDifferentRanks() {
+    void compareFlushVsStraight() {
         PokerHand flushHand = new PokerHand("3C 5C 7C 9C KC");
         PokerHand straightHand = new PokerHand("9D TC JH QC KC");
 
@@ -95,7 +95,7 @@ public class PokerHandTest {
     }
 
     @Test
-    void testCompareToRoyalFlushVsFourOfAKind() {
+    void compareRoyalFlushVsFourOfAKind() {
         PokerHand royalFlushHand = new PokerHand("AC KC QC JC TC");
         PokerHand fourOfAKindHand = new PokerHand("7S 7H 7C 7D 2H");
 
@@ -104,7 +104,7 @@ public class PokerHandTest {
     }
 
     @Test
-    void testCompareToWithNull() {
+    void compareHandWithNull() {
         PokerHand hand = new PokerHand("KH JD 9C 3S 2D");
 
         assertThrows(NullPointerException.class, () -> hand.compareTo(null),
@@ -112,7 +112,7 @@ public class PokerHandTest {
     }
 
     @Test
-    void testNoCombination() {
+    void detectHighCard() {
         PokerHand highCard = new PokerHand("KS 2H 5C JD TD");
         PokerHand notHighCard = new PokerHand("3C 3D 5C 5D 9C");
 
@@ -121,7 +121,7 @@ public class PokerHandTest {
     }
 
     @Test
-    void testIsOnePair() {
+    void detectOnePair() {
         PokerHand onePair = new PokerHand("3C 3D JC QC AC");
         PokerHand notOnePair = new PokerHand("4S 5C 6H 8D 9S");
 
@@ -130,7 +130,7 @@ public class PokerHandTest {
     }
 
     @Test
-    void testIsTwoPair() {
+    void detectTwoPair() {
         PokerHand twoPair = new PokerHand("4C 4D 9C 9D JC");
         PokerHand notTwoPair = new PokerHand("2C 4C 6C 8C TC");
 
@@ -139,7 +139,7 @@ public class PokerHandTest {
     }
 
     @Test
-    void testIsSet() {
+    void detectSet() {
         PokerHand set = new PokerHand("KH KD KC JC QC");
         PokerHand notSet = new PokerHand("3C 5C 7C 9C KC");
 
@@ -148,7 +148,7 @@ public class PokerHandTest {
     }
 
     @Test
-    void testIsStraight() {
+    void detectStraight() {
         PokerHand regularStraight = new PokerHand("9D TC JH QC KC");
         PokerHand wheelStraight = new PokerHand("AC 2C 3D 4C 5S");
         PokerHand notStraight = new PokerHand("KC KD KH AC AS");
@@ -159,7 +159,7 @@ public class PokerHandTest {
     }
 
     @Test
-    void testIsFlush() {
+    void detectFlush() {
         PokerHand flush = new PokerHand("3C 5C 7C 9C KC");
         PokerHand notFlush = new PokerHand("5H 6S 7D 8C 9H");
 
@@ -168,7 +168,7 @@ public class PokerHandTest {
     }
 
     @Test
-    void testIsStraightFlush() {
+    void detectStraightFlush() {
         PokerHand regularStraightFlush = new PokerHand("9C TC JC QC KC");
         PokerHand wheelStraightFlush = new PokerHand("AS 2S 3S 4S 5S");
         PokerHand notStraightFlush = new PokerHand("5H 6S 7D 8C 9H");
@@ -179,7 +179,7 @@ public class PokerHandTest {
     }
 
     @Test
-    void testIsFullHouse() {
+    void detectFullHouse() {
         PokerHand fullHouseHand = new PokerHand("3S 3H 3C 5D 5H");
         PokerHand notFullHouseHand = new PokerHand("3S 3H 4C 5D 5H");
 
@@ -188,7 +188,7 @@ public class PokerHandTest {
     }
 
     @Test
-    void testIsFourOfAKind() {
+    void detectFourOfAKind() {
         PokerHand fourOfAKindHand = new PokerHand("7S 7H 7C 7D 2H");
         PokerHand notFourOfAKindHand = new PokerHand("7S 7H 7C 2D 2H");
 
@@ -197,7 +197,7 @@ public class PokerHandTest {
     }
 
     @Test
-    void testIsRoyalFlush() {
+    void detectRoyalFlush() {
         PokerHand royalFlush = new PokerHand("AC KC QC JC TC");
         PokerHand notRoyalFlush = new PokerHand("AC KC QC JD TC");
 

@@ -2,7 +2,7 @@ package texasholdem;
 
 import java.util.Objects;
 
-public class Card {
+public class Card implements Comparable<Card> {
     private final CardRank rank;
     private final CardSuit suit;
 
@@ -10,11 +10,8 @@ public class Card {
         if (card.length() != 2) {
             throw new IllegalArgumentException("Invalid card format: " + card + ". Each card must be 2 characters long.");
         }
-        char rank = card.charAt(0);
-        char suit = card.charAt(1);
-
-        this.rank = CardRank.of(rank);
-        this.suit = CardSuit.of(suit);
+        this.rank = CardRank.of(card.charAt(0));
+        this.suit = CardSuit.of(card.charAt(1));
     }
 
     @Override
@@ -33,10 +30,7 @@ public class Card {
 
     @Override
     public String toString() {
-        return "Card{" +
-                "cardRank=" + rank +
-                ", cardSuit=" + suit +
-                '}';
+        return "" + rank.getLetter() + suit.getSuit();
     }
 
     public CardSuit getSuit() {
@@ -45,5 +39,10 @@ public class Card {
 
     public CardRank getRank() {
         return rank;
+    }
+
+    @Override
+    public int compareTo(Card o) {
+        return Integer.compare(this.rank.getWeight(), o.rank.getWeight());
     }
 }

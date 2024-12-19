@@ -2,7 +2,7 @@ package texasholdem;
 
 import java.util.*;
 import java.util.function.Function;
-import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class PokerHand implements Comparable<PokerHand> {
 
@@ -13,17 +13,15 @@ public class PokerHand implements Comparable<PokerHand> {
     // However, if both the combination and the highest card are identical,
     // the comparison will continue by the rank within the combination, and then by the rank of the kickers.
     private Integer weight;
-    private List<Map.Entry<Character, Integer>> combination;
-    private List<Map.Entry<Character, Integer>> kickers;
-
-    private static final Pattern PATTERN = Pattern.compile("\\s+");
+    private List<Card> combination;
+    private List<Card> kickers;
 
     public PokerHand(String cardCombination) {
         if (cardCombination == null || cardCombination.isBlank()) {
             throw new IllegalArgumentException("Card combination cannot be null or empty.");
         }
 
-        this.cardsAtHand = Arrays.stream(PATTERN.split(cardCombination))
+        this.cardsAtHand = Arrays.stream(cardCombination.split(" "))
                 .map(Card::new)
                 .toList();
 
@@ -45,9 +43,11 @@ public class PokerHand implements Comparable<PokerHand> {
         PokerHandEvaluator pokerHandEvaluator = new PokerHandEvaluator();
         this.handRanking = pokerHandEvaluator.evaluate(this);
         this.weight = handRanking.getWeight();
-        Optional<Map.Entry<Character, Integer>> maxEntry = combination.stream()
-                .max(Comparator.comparingInt(Map.Entry::getValue));
-        maxEntry.ifPresent(characterIntegerEntry -> this.weight += characterIntegerEntry.getValue());
+
+        Optional<Card> maxCard = combination.stream()
+                .max(Comparator.comparingInt(card -> card.getRank().getWeight()));
+
+        maxCard.ifPresent(card -> this.weight += card.getRank().getWeight());
     }
 
     public int compareTo(PokerHand other) {
@@ -55,12 +55,12 @@ public class PokerHand implements Comparable<PokerHand> {
         return comparator.compare(this, other);
     }
 
-    void setCombination(List<Map.Entry<Character, Integer>> combination) {
+    void setCombination(List<Card> combination) {
         this.combination = combination;
-        combination.sort((entry1, entry2) -> entry2.getValue().compareTo(entry1.getValue()));
+        combination.sort(Comparator.reverseOrder());
     }
 
-    void setKickers(List<Map.Entry<Character, Integer>> kickers) {
+    void setKickers(List<Card> kickers) {
         this.kickers = kickers;
     }
 
@@ -73,12 +73,13 @@ public class PokerHand implements Comparable<PokerHand> {
     }
 
     private Map<Character, Integer> getCounts(Function<Card, Character> function) {
-        Map<Character, Integer> counts = new HashMap<>();
-        for (Card card : cardsAtHand) {
-            char key = function.apply(card);
-            counts.put(key, counts.getOrDefault(key, 0) + 1);
-        }
-        return counts;
+        return cardsAtHand.stream()
+                .map(function)
+                .collect(Collectors.toMap(
+                        key -> key,
+                        value -> 1,
+                        Integer::sum
+                ));
     }
 
     public List<Card> getCardsAtHand() {
@@ -93,7 +94,7 @@ public class PokerHand implements Comparable<PokerHand> {
         return getCounts(this::getSuit);
     }
 
-    public List<Map.Entry<Character, Integer>> getKickers() {
+    public List<Card> getKickers() {
         return kickers;
     }
 
@@ -101,7 +102,7 @@ public class PokerHand implements Comparable<PokerHand> {
         return weight;
     }
 
-    public List<Map.Entry<Character, Integer>> getCombination() {
+    public List<Card> getCombination() {
         return combination;
     }
 

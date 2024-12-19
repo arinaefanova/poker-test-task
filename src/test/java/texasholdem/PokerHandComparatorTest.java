@@ -15,7 +15,7 @@ class PokerHandComparatorTest {
     }
 
     @Test
-    void compare_ShouldReturnNegativeWhenHand1IsHigher() {
+    void compareWhenFirstHandIsHigher() {
         PokerHand hand1 = new PokerHand("AS KS QS JS TS");
         PokerHand hand2 = new PokerHand("KH QH JH TH 9H");
 
@@ -25,7 +25,7 @@ class PokerHandComparatorTest {
     }
 
     @Test
-    void compare_ShouldReturnPositiveWhenHand2IsHigher() {
+    void compareWhenSecondHandIsHigher() {
         PokerHand hand1 = new PokerHand("AH KH QH JH 9H");
         PokerHand hand2 = new PokerHand("AS KS QS JS TS");
 
@@ -35,7 +35,7 @@ class PokerHandComparatorTest {
     }
 
     @Test
-    void compare_ShouldReturnZeroWhenHandsHaveSameWeightAndCombination() {
+    void compareWhenHandsHaveSameWeightAndCombination() {
         PokerHand hand1 = new PokerHand("AS KS QS JS TS");
         PokerHand hand2 = new PokerHand("AH KH QH JH TH");
 
@@ -45,7 +45,7 @@ class PokerHandComparatorTest {
     }
 
     @Test
-    void compare_ShouldReturnNegativeWhenHand1HasHigherKicker() {
+    void compareWhenFirstHandHasHigherKicker() {
         PokerHand hand1 = new PokerHand("AS KS QS JS TS");
         PokerHand hand2 = new PokerHand("AS KS QS JS 9S");
 
@@ -55,7 +55,7 @@ class PokerHandComparatorTest {
     }
 
     @Test
-    void compare_ShouldReturnPositiveWhenHand2HasHigherKicker() {
+    void compareWhenSecondHandHasHigherKicker() {
         PokerHand hand1 = new PokerHand("AS KS QS JS 9S");
         PokerHand hand2 = new PokerHand("AS KS QS JS TS");
 
