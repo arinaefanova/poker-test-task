@@ -7,10 +7,10 @@ public class WheelStraightCard extends Card {
     }
 
     @Override
-    public CardRank getRank() {
-        if (super.getRank() == CardRank.ACE) {
-            return CardRank.TWO;
+    public int getWeight() {
+        if (this.getRank() == CardRank.ACE) {
+            return 1;
         }
-        return super.getRank();
+        return super.getWeight();
     }
 }

@@ -41,8 +41,12 @@ public class Card implements Comparable<Card> {
         return rank;
     }
 
+    public int getWeight() {
+        return this.rank.getWeight();
+    }
+
     @Override
     public int compareTo(Card o) {
-        return Integer.compare(this.rank.getWeight(), o.rank.getWeight());
+        return Integer.compare(this.getWeight(), o.getWeight());
     }
 }

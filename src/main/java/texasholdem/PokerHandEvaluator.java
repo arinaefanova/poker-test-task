@@ -53,7 +53,7 @@ public class PokerHandEvaluator {
 
             List<Integer> sequence = getSequence(pokerHand);
             if (sequence != null){
-                return assignStraightFlush(pokerHand, rankCounts);
+                return assignStraightFlush(pokerHand, sequence, rankCounts);
             }
 
             return assignFlush(pokerHand, rankCounts);
@@ -139,6 +139,20 @@ public class PokerHandEvaluator {
                  .collect(Collectors.toList());
     }
 
+    private void sortWheelStraight(List<Card> combination) {
+        combination.stream()
+                .filter(card -> card.getRank() == CardRank.ACE)
+                .findFirst()
+                .ifPresent(card -> combination.replaceAll(c -> {
+                    if (c.getRank() == CardRank.ACE) {
+                        return new WheelStraightCard(c);
+                    }
+                    return c;
+                }));
+        combination.sort(null);
+        Collections.reverse(combination);
+    }
+
     /**
      * Returns the **High Card** ranking for the given hand and sets the kickers.
      * A High Card is simply the highest card in the hand, when no other combination is formed.
@@ -211,19 +225,10 @@ public class PokerHandEvaluator {
         List<Card> combination = createCardList(rankCounts, 1, pokerHand);
 
         if (sequence.equals(WHEEL_STRAIGHT_RANKS)) {
-            combination.stream()
-                    .filter(card -> card.getRank() == CardRank.ACE)
-                    .findFirst()
-                    .ifPresent(card -> combination.replaceAll(c -> {
-                        if (c.getRank() == CardRank.ACE) {
-                            return new WheelStraightCard(c);
-                        }
-                        return c;
-                    }));
+            sortWheelStraight(combination);
         }
 
         pokerHand.setCombination(combination);
-
         return HandRanking.STRAIGHT;
     }
 
@@ -281,8 +286,14 @@ public class PokerHandEvaluator {
      * @param rankCounts A map of card ranks and their frequencies.
      * @return The **HandRanking.STRAIGHT_FLUSH**
      */
-    private HandRanking assignStraightFlush(PokerHand pokerHand, Map<Character, Integer> rankCounts) {
-        pokerHand.setCombination(createCardList(rankCounts, RankFrequency.SINGLE, pokerHand));
+    private HandRanking assignStraightFlush(PokerHand pokerHand, List<Integer> sequence, Map<Character, Integer> rankCounts) {
+        List<Card> combination = createCardList(rankCounts, RankFrequency.SINGLE, pokerHand);
+
+        if (sequence.equals(WHEEL_STRAIGHT_RANKS)) {
+            sortWheelStraight(combination);
+        }
+
+        pokerHand.setCombination(combination);
         return HandRanking.STRAIGHT_FLUSH;
     }
 
