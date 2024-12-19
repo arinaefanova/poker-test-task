@@ -57,7 +57,6 @@ public class PokerHand implements Comparable<PokerHand> {
 
     void setCombination(List<Card> combination) {
         this.combination = combination;
-        combination.sort(Comparator.reverseOrder());
     }
 
     void setKickers(List<Card> kickers) {

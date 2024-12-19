@@ -125,29 +125,17 @@ public class PokerHandEvaluator {
     }
 
     /**
-     * Creates a list of combination cards based on the frequency of ranks in the hand.
+     * Creates a list of combination-cards or kickers based on the frequency of ranks in the hand.
      *
      * @param rankCounts A map of rank frequencies (rank -> count)
      * @param frequency The frequency of the rank to create a combination (e.g., pair, set)
+     * @param pokerHand The poker hand to evaluate.
      * @return A list of map entries representing the combination (rank - position of the card)
      */
-     private List<Card> createCombination(Map<Character, Integer> rankCounts, Integer frequency, PokerHand pokerHand) {
+     private List<Card> createCardList(Map<Character, Integer> rankCounts, Integer frequency, PokerHand pokerHand) {
          return pokerHand.getCardsAtHand().stream()
                  .filter(card -> Objects.equals(rankCounts.get(card.getRank().getLetter()), frequency))
-                 .collect(Collectors.toList());
-    }
-
-    /**
-     * Creates a list of kickers (cards that are not part of the main combination).
-     *
-     * @param rankCounts A map of rank frequencies (rank -> count)
-     * @param value The frequency to filter by (e.g., 1 for single cards, 2 for pairs)
-     * @return A sorted list of kickers represented by rank and position
-     */
-     private List<Card>  createKickers(Map<Character, Integer> rankCounts, Integer value, PokerHand pokerHand) {
-         return pokerHand.getCardsAtHand().stream()
-                 .filter(card -> Objects.equals(rankCounts.get(card.getRank().getLetter()), value))
-                 .sorted((a, b) -> Integer.compare(b.getRank().getWeight(), a.getRank().getWeight()))
+                 .sorted(Comparator.reverseOrder())
                  .collect(Collectors.toList());
     }
 
@@ -161,7 +149,7 @@ public class PokerHandEvaluator {
      * @return The **HandRanking.HIGH_CARD**.
      */
     private HandRanking assignHighCard(PokerHand pokerHand, Map<Character, Integer> rankCounts) {
-        pokerHand.setKickers(createKickers(rankCounts, RankFrequency.SINGLE, pokerHand));
+        pokerHand.setKickers(createCardList(rankCounts, RankFrequency.SINGLE, pokerHand));
         return HandRanking.HIGH_CARD;
     }
 
@@ -174,8 +162,8 @@ public class PokerHandEvaluator {
      * @return The **HandRanking.ONE_PAIR**.
      */
     private HandRanking assignOnePair(PokerHand pokerHand, Map<Character, Integer> rankCounts) {
-        pokerHand.setCombination(createCombination(rankCounts, RankFrequency.PAIR, pokerHand));
-        pokerHand.setKickers(createKickers(rankCounts, RankFrequency.SINGLE, pokerHand));
+        pokerHand.setCombination(createCardList(rankCounts, RankFrequency.PAIR, pokerHand));
+        pokerHand.setKickers(createCardList(rankCounts, RankFrequency.SINGLE, pokerHand));
 
         return HandRanking.ONE_PAIR;
     }
@@ -189,8 +177,8 @@ public class PokerHandEvaluator {
      * @return The **HandRanking.TWO_PAIR**
      */
     private HandRanking assignTwoPair(PokerHand pokerHand, Map<Character, Integer> rankCounts) {
-        pokerHand.setCombination(createCombination(rankCounts, RankFrequency.PAIR, pokerHand));
-        pokerHand.setKickers(createKickers(rankCounts, RankFrequency.SINGLE, pokerHand));
+        pokerHand.setCombination(createCardList(rankCounts, RankFrequency.PAIR, pokerHand));
+        pokerHand.setKickers(createCardList(rankCounts, RankFrequency.SINGLE, pokerHand));
 
         return HandRanking.TWO_PAIR;
     }
@@ -204,8 +192,8 @@ public class PokerHandEvaluator {
      * @return The **HandRanking.SET**
      */
     private HandRanking assignSet(PokerHand pokerHand, Map<Character, Integer> rankCounts) {
-            pokerHand.setCombination(createCombination(rankCounts, RankFrequency.TRIPLE, pokerHand));
-            pokerHand.setKickers(createKickers(rankCounts, RankFrequency.SINGLE, pokerHand));
+            pokerHand.setCombination(createCardList(rankCounts, RankFrequency.TRIPLE, pokerHand));
+            pokerHand.setKickers(createCardList(rankCounts, RankFrequency.SINGLE, pokerHand));
         return HandRanking.SET;
     }
 
@@ -220,7 +208,7 @@ public class PokerHandEvaluator {
      * @return The **HandRanking.STRAIGHT**
      */
     private HandRanking assignStraight(PokerHand pokerHand, List<Integer> sequence, Map<Character, Integer> rankCounts) {
-        List<Card> combination = createCombination(rankCounts, 1, pokerHand);
+        List<Card> combination = createCardList(rankCounts, 1, pokerHand);
 
         if (sequence.equals(WHEEL_STRAIGHT_RANKS)) {
             combination.stream()
@@ -249,7 +237,7 @@ public class PokerHandEvaluator {
      * @return The **HandRanking.FLUSH**
      */
     private HandRanking assignFlush(PokerHand pokerHand, Map<Character, Integer> rankCounts) {
-        pokerHand.setCombination(createCombination(rankCounts, RankFrequency.SINGLE, pokerHand));
+        pokerHand.setCombination(createCardList(rankCounts, RankFrequency.SINGLE, pokerHand));
 
         return HandRanking.FLUSH;
     }
@@ -263,8 +251,8 @@ public class PokerHandEvaluator {
      * @return The **HandRanking.FULL_HOUSE**
      */
     private HandRanking assignFullHouse(PokerHand pokerHand, Map<Character, Integer> rankCounts) {
-        pokerHand.setCombination(createCombination(rankCounts, RankFrequency.TRIPLE, pokerHand));
-        pokerHand.setKickers(createKickers(rankCounts, RankFrequency.PAIR, pokerHand));
+        pokerHand.setCombination(createCardList(rankCounts, RankFrequency.TRIPLE, pokerHand));
+        pokerHand.setKickers(createCardList(rankCounts, RankFrequency.PAIR, pokerHand));
 
         return HandRanking.FULL_HOUSE;
     }
@@ -278,8 +266,8 @@ public class PokerHandEvaluator {
      * @return The **HandRanking.FOUR_OF_A_KIND**
      */
     private HandRanking assignFourOfAKind(PokerHand pokerHand, Map<Character, Integer> rankCounts) {
-        pokerHand.setCombination(createCombination(rankCounts, RankFrequency.QUADRUPLE, pokerHand));
-        pokerHand.setKickers(createKickers(rankCounts, RankFrequency.SINGLE, pokerHand));
+        pokerHand.setCombination(createCardList(rankCounts, RankFrequency.QUADRUPLE, pokerHand));
+        pokerHand.setKickers(createCardList(rankCounts, RankFrequency.SINGLE, pokerHand));
 
         return HandRanking.FOUR_OF_A_KIND;
     }
@@ -294,7 +282,7 @@ public class PokerHandEvaluator {
      * @return The **HandRanking.STRAIGHT_FLUSH**
      */
     private HandRanking assignStraightFlush(PokerHand pokerHand, Map<Character, Integer> rankCounts) {
-        pokerHand.setCombination(createCombination(rankCounts, RankFrequency.SINGLE, pokerHand));
+        pokerHand.setCombination(createCardList(rankCounts, RankFrequency.SINGLE, pokerHand));
         return HandRanking.STRAIGHT_FLUSH;
     }
 
@@ -308,7 +296,7 @@ public class PokerHandEvaluator {
      * @return The **HandRanking.ROYAL_FLUSH**
      */
     private HandRanking assignRoyalFlush(PokerHand pokerHand, Map<Character, Integer> rankCounts) {
-        pokerHand.setCombination(createCombination(rankCounts, RankFrequency.SINGLE, pokerHand));
+        pokerHand.setCombination(createCardList(rankCounts, RankFrequency.SINGLE, pokerHand));
         return HandRanking.ROYAL_FLUSH;
     }
 }
