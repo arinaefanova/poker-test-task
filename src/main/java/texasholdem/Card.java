@@ -2,6 +2,12 @@ package texasholdem;
 
 import java.util.Objects;
 
+/**
+ * Note: This class has a natural ordering (as defined by the {@link #compareTo(Card)} method)
+ * that is inconsistent with {@link #equals(Object)}.
+ * Specifically, two cards are considered equal if they have the same rank and suit,
+ * but their natural ordering is determined only by the rank's weight.
+ */
 public class Card implements Comparable<Card> {
     private final CardRank rank;
     private final CardSuit suit;

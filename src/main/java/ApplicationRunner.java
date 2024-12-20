@@ -11,6 +11,8 @@ public class ApplicationRunner {
 
         PokerHand pokerHand = new PokerHand("2C 3D AC 4C 5C");
         hands.add(pokerHand);
+        hands.add(new PokerHand("KC QC AC JC TC"));
+        hands.add(new PokerHand("2C 3C 6C 4C 5C"));
         hands.add(new PokerHand("KS 2H 5C JD TD"));
         hands.add(new PokerHand("2C 3C AC 4C 5C"));
 
