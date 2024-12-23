@@ -18,7 +18,7 @@ public class PokerHandComparator implements Comparator<PokerHand> {
      */
     @Override
     public int compare(PokerHand hand1, PokerHand hand2) {
-        int compareByCombination = hand2.getWeight().compareTo(hand1.getWeight());
+        int compareByCombination = hand2.getCombinationAtHand().getWeight().compareTo(hand1.getCombinationAtHand().getWeight());
         if (compareByCombination != 0) {
             return compareByCombination;
         }
@@ -37,8 +37,8 @@ public class PokerHandComparator implements Comparator<PokerHand> {
      *         or 0 if both hands are the same based on their high cards and kickers.
      */
     private int compareByHighCards(PokerHand hand1, PokerHand hand2) {
-        List<Card> combination1 = hand1.getCombination();
-        List<Card> combination2 = hand2.getCombination();
+        List<Card> combination1 = hand1.getCombinationAtHand().getCombination();
+        List<Card> combination2 = hand2.getCombinationAtHand().getCombination();
 
         for (int i = 0; i < combination1.size(); i++) {
             int comparison = combination1.get(i).compareTo(combination2.get(i));
@@ -47,8 +47,8 @@ public class PokerHandComparator implements Comparator<PokerHand> {
             }
         }
 
-        List<Card> kickers1 = hand1.getKickers();
-        List<Card> kickers2 = hand2.getKickers();
+        List<Card> kickers1 = hand1.getCombinationAtHand().getKickers();
+        List<Card> kickers2 = hand2.getCombinationAtHand().getKickers();
 
         for (int i = 0; i < kickers1.size(); i++) {
             int comparison = kickers2.get(i).compareTo(kickers1.get(i));
