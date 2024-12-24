@@ -3,7 +3,6 @@ package texasholdem;
 import java.util.List;
 
 public class CombinationAtHand {
-
     private final HandRanking handRanking;
     // The weight always consists of the combination weight + the highest card weight in the combination
     // (this is enough for most sorting and is done for code optimization)
