@@ -55,14 +55,11 @@ public class PokerHandEvaluator {
             } else {
                 return assignHighCard(pokerHand, rankCounts);
             }
-        }
-        if (uniqueRanks == 4) {
+        } else if (uniqueRanks == 4) {
             return assignOnePair(pokerHand, rankCounts);
-        }
-        if (uniqueRanks == 3) {
+        } else if (uniqueRanks == 3) {
             return rankCounts.containsValue(3) ? assignSet(pokerHand, rankCounts) : assignTwoPair(pokerHand, rankCounts);
-        }
-        if (uniqueRanks == 2) {
+        } else if (uniqueRanks == 2) {
             return rankCounts.containsValue(4) ? assignFourOfAKind(pokerHand, rankCounts) : assignFullHouse(pokerHand, rankCounts);
         }
         throw new IllegalStateException("Unexpected hand state");

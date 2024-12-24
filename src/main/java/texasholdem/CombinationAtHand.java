@@ -1,8 +1,6 @@
 package texasholdem;
 
-import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 
 public class CombinationAtHand {
 
@@ -11,7 +9,7 @@ public class CombinationAtHand {
     // (this is enough for most sorting and is done for code optimization)
     // However, if both the combination and the highest card are identical,
     // the comparison will continue by the rank within the combination, and then by the rank of the kickers.
-    private Integer weight;
+    private final Integer weight;
     private final List<Card> combination;
     private final List<Card> kickers;
 
@@ -19,11 +17,11 @@ public class CombinationAtHand {
         this.handRanking = handRanking;
         this.combination = combination;
         this.kickers = kickers;
-        this.weight = handRanking.getWeight();
-
-        Optional<Card> maxCard = combination.stream()
-                .max(Comparator.comparingInt(Card::getWeight));
-        maxCard.ifPresent(card -> this.weight += card.getWeight());
+        this.weight = handRanking.getWeight() +
+                combination.stream()
+                        .mapToInt(Card::getWeight)
+                        .max()
+                        .orElse(0);
     }
 
     public Integer getWeight() {
