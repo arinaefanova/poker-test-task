@@ -13,11 +13,9 @@ public class PokerHand implements Comparable<PokerHand> {
         if (cardCombination == null || cardCombination.isBlank()) {
             throw new IllegalArgumentException("Card combination cannot be null or empty.");
         }
-
         this.cardsAtHand = Arrays.stream(cardCombination.split(" "))
                 .map(Card::new)
                 .toList();
-
         if (this.cardsAtHand.size() != 5) {
             throw new IllegalArgumentException("Poker Hand must contain exactly 5 cards.");
         }

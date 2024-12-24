@@ -30,12 +30,19 @@ public class PokerHandEvaluator {
     }
 
     /**
-     * The method checks the hand against all possible poker rankings, in order of priority.
-     * If a matching ranking is found, it returns the corresponding hand ranking.
-     * If no other ranking matches, the hand is classified as **HIGH_CARD**.
+     * Evaluates the poker hand and determines its ranking based on poker rules.
+     *
+     * The evaluation is based on the number of unique ranks in the hand:
+     * - 5 unique ranks: Possible **HIGH_CARD**, **STRAIGHT**, **FLUSH**, **STRAIGHT_FLUSH** or **ROYAL_FLUSH**.
+     * - 4 unique ranks: Corresponds to **ONE_PAIR**.
+     * - 3 unique ranks: Could be either **TWO_PAIR** or **SET**.
+     * - 2 unique ranks: Could be either **FULL_HOUSE** or **FOUR_OF_A_KIND**.
+     *
+     * If no valid ranking is found (which should not occur with valid input), an exception is thrown.
      *
      * @param pokerHand The poker pokerHand to evaluate
-     * @return The highest-ranking hand that matches the given poker hand, or **HIGH_CARD** if no other ranking matches.
+     * @return A {@link CombinationAtHand} object representing the highest-ranking combination.
+     * @throws IllegalStateException if the hand is in an unexpected state.
      */
     public CombinationAtHand evaluate(PokerHand pokerHand) {
         Map<CardRank, Integer> rankCounts = pokerHand.getRankCounts();
@@ -54,6 +61,14 @@ public class PokerHandEvaluator {
         };
     }
 
+    /**
+     * Evaluates a poker hand with exactly five unique ranks and determines its combination.
+     * Checks for **Straight Flush** or **Royal Flush**, **Flush**, **Straight** and **High Card** in priority order.
+     *
+     * @param pokerHand The poker hand to evaluate.
+     * @param rankCounts A map of card ranks to their frequencies.
+     * @return A {@link CombinationAtHand} representing the determined combination.
+     */
     private CombinationAtHand evaluateUniqueRanksFive(PokerHand pokerHand, Map<CardRank, Integer> rankCounts) {
         boolean hasFlush = pokerHand.getSuitCounts().containsValue(SuitFrequency.FLUSH_CARDS_IN_SUIT);
         boolean hasStraight = getSequence(pokerHand) != null;
@@ -69,12 +84,19 @@ public class PokerHandEvaluator {
         }
     }
 
+    /**
+     * Helper method to evaluate whether a poker hand is a **Straight Flush** or **Royal Flush**.
+     * Determines the exact combination based on the ranks of the cards in the hand.
+     *
+     * @param pokerHand The poker hand to evaluate.
+     * @param rankCounts A map of card ranks to their frequencies.
+     * @return A {@link CombinationAtHand} representing either a **Royal Flush** or a **Straight Flush**.
+     */
     private CombinationAtHand evaluateStraightFlushOrRoyalFlush(PokerHand pokerHand, Map<CardRank, Integer> rankCounts) {
         boolean hasRoyalFlushRanks = ROYAL_FLUSH_RANKS.stream()
                 .allMatch(rank -> pokerHand.getCardsAtHand().stream()
                         .map(pokerHand::getRank)
                         .anyMatch(cardRank -> cardRank.getLetter() == rank));
-
         return hasRoyalFlushRanks
                 ? assignRoyalFlush(pokerHand, rankCounts)
                 : assignStraightFlush(pokerHand, rankCounts);
@@ -92,10 +114,8 @@ public class PokerHandEvaluator {
                 .map(card -> CardRank.of(pokerHand.getRank(card).getLetter()).getWeight())
                 .sorted()
                 .toList();
-
         boolean isSequential = IntStream.range(1, sequence.size())
                 .allMatch(i -> sequence.get(i) - sequence.get(i - 1) == 1);
-
         return (isSequential || sequence.equals(WHEEL_STRAIGHT_RANKS)) ? sequence : null;
     }
 
