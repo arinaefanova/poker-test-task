@@ -6,21 +6,23 @@ import java.util.stream.Collectors;
 
 public class PokerHand implements Comparable<PokerHand> {
 
-    private final List<Card> cardsAtHand;
-    private final CombinationAtHand combinationAtHand;
+    private final List<Card> cards;
+    private final Combination combination;
 
     public PokerHand(String cardCombination) {
         if (cardCombination == null || cardCombination.isBlank()) {
             throw new IllegalArgumentException("Card combination cannot be null or empty.");
         }
-        this.cardsAtHand = Arrays.stream(cardCombination.split(" "))
+        this.cards = Arrays.stream(cardCombination.split(" "))
                 .map(Card::new)
+                .sorted(Comparator.reverseOrder())
                 .toList();
-        if (this.cardsAtHand.size() != 5) {
+
+        if (this.cards.size() != 5) {
             throw new IllegalArgumentException("Poker Hand must contain exactly 5 cards.");
         }
         PokerHandEvaluator pokerHandEvaluator = new PokerHandEvaluator();
-        this.combinationAtHand = pokerHandEvaluator.evaluate(this);
+        this.combination = pokerHandEvaluator.evaluate(this);
     }
 
     public int compareTo(PokerHand other) {
@@ -37,7 +39,7 @@ public class PokerHand implements Comparable<PokerHand> {
     }
 
     private <E extends Enum<E>> Map<E, Integer> getCounts(Function<Card, E> function) {
-        return cardsAtHand.stream()
+        return cards.stream()
                 .map(function)
                 .collect(Collectors.toMap(
                         key -> key,
@@ -54,12 +56,12 @@ public class PokerHand implements Comparable<PokerHand> {
         return getCounts(this::getSuit);
     }
 
-    public List<Card> getCardsAtHand() {
-        return cardsAtHand;
+    public List<Card> getCards() {
+        return cards;
     }
 
-    public CombinationAtHand getCombinationAtHand() {
-        return combinationAtHand;
+    public Combination getCombination() {
+        return combination;
     }
 
     @Override
@@ -67,19 +69,19 @@ public class PokerHand implements Comparable<PokerHand> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PokerHand pokerHand = (PokerHand) o;
-        return new HashSet<>(this.cardsAtHand).equals(new HashSet<>(pokerHand.cardsAtHand));
+        return new HashSet<>(this.cards).equals(new HashSet<>(pokerHand.cards));
     }
 
     @Override
     public int hashCode() {
-        return new HashSet<>(cardsAtHand).hashCode();
+        return new HashSet<>(cards).hashCode();
     }
 
     @Override
     public String toString() {
         return "PokerHand{" +
-                "cardsAtHand=" + cardsAtHand +
-                ", " + combinationAtHand +
+                "cards=" + cards +
+                ", " + combination +
                 '}';
     }
 }

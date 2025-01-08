@@ -1,7 +1,9 @@
 package texasholdem;
 
 import java.util.Comparator;
-import java.util.List;
+import java.util.Iterator;
+import java.util.TreeSet;
+
 public class PokerHandComparator implements Comparator<PokerHand> {
 
     /**
@@ -18,9 +20,13 @@ public class PokerHandComparator implements Comparator<PokerHand> {
      */
     @Override
     public int compare(PokerHand hand1, PokerHand hand2) {
-        int compareByCombination = hand2.getCombinationAtHand().getWeight().compareTo(hand1.getCombinationAtHand().getWeight());
+        int compareByCombination = hand2.getCombination().getWeight().compareTo(hand1.getCombination().getWeight());
         if (compareByCombination != 0) {
             return compareByCombination;
+        }
+        boolean compareRoyalFlash = hand1.getCombination().getHandRanking() == HandRanking.ROYAL_FLUSH;
+        if (compareRoyalFlash) {
+            return 0;
         }
         return compareByHighCards(hand1, hand2);
     }
@@ -37,21 +43,23 @@ public class PokerHandComparator implements Comparator<PokerHand> {
      *         or 0 if both hands are the same based on their high cards and kickers.
      */
     private int compareByHighCards(PokerHand hand1, PokerHand hand2) {
-        List<Card> combination1 = hand1.getCombinationAtHand().getCombination();
-        List<Card> combination2 = hand2.getCombinationAtHand().getCombination();
+        TreeSet<Card> combination1 = hand1.getCombination().getCombination();
+        TreeSet<Card> combination2 = hand2.getCombination().getCombination();
 
-        for (int i = 0; i < combination1.size(); i++) {
-            int comparison = combination1.get(i).compareTo(combination2.get(i));
-            if (comparison != 0) {
-                return comparison;
-            }
-        }
+        int comparison = compareCombinationsByIterator(combination2, combination1);
+        if (comparison != 0) return comparison;
 
-        List<Card> kickers1 = hand1.getCombinationAtHand().getKickers();
-        List<Card> kickers2 = hand2.getCombinationAtHand().getKickers();
+        TreeSet<Card> kickers1 = hand1.getCombination().getKickers();
+        TreeSet<Card> kickers2 = hand2.getCombination().getKickers();
 
-        for (int i = 0; i < kickers1.size(); i++) {
-            int comparison = kickers2.get(i).compareTo(kickers1.get(i));
+        return compareCombinationsByIterator(kickers2, kickers1);
+    }
+
+    private Integer compareCombinationsByIterator(TreeSet<Card> combination1, TreeSet<Card> combination2) {
+        Iterator<Card> it1 = combination1.iterator();
+        Iterator<Card> it2 = combination2.iterator();
+        while (it1.hasNext() && it2.hasNext()) {
+            int comparison = it1.next().compareTo(it2.next());
             if (comparison != 0) {
                 return comparison;
             }

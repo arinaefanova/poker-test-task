@@ -79,10 +79,21 @@ public class PokerHandTest {
         PokerHand fourOfAKindHand1 = new PokerHand("KH KD KC KS JC");
         PokerHand fourOfAKindHand2 = new PokerHand("KH KD KC KS 3C");
 
-        assertTrue(fourOfAKindHand2.compareTo(fourOfAKindHand1) > 0,
-                "Hand with lower kicker (3) should rank lower than hand with higher kicker (Jack)");
         assertTrue(fourOfAKindHand1.compareTo(fourOfAKindHand2) < 0,
                 "Hand with higher kicker (Jack) should rank higher than hand with lower kicker (3)");
+        assertTrue(fourOfAKindHand2.compareTo(fourOfAKindHand1) > 0,
+                "Hand with lower kicker (3) should rank lower than hand with higher kicker (Jack)");
+    }
+
+    @Test
+    void compareSameHandsWithDifferentCards() {
+        PokerHand flushHand1 = new PokerHand("3D 5D 7D 9D JD");
+        PokerHand flushHand2 = new PokerHand("2H 4H 6H 8H TH");
+
+        assertTrue(flushHand1.compareTo(flushHand2) < 0,
+                "Hand with higher kicker (Jack) should rank higher than hand with lower kicker (T)");
+        assertTrue(flushHand2.compareTo(flushHand1) > 0,
+                "Hand with lower kicker (T) should rank lower than hand with higher kicker (Jack)");
     }
 
     @Test
@@ -116,8 +127,8 @@ public class PokerHandTest {
         PokerHand highCard = new PokerHand("KS 2H 5C JD TD");
         PokerHand notHighCard = new PokerHand("3C 3D 5C 5D 9C");
 
-        assertEquals(HIGH_CARD, highCard.getCombinationAtHand().getHandRanking(), "Expected hand ranking to be high card");
-        assertNotEquals(HIGH_CARD, notHighCard.getCombinationAtHand().getHandRanking(), "Expected hand ranking to not be high card");
+        assertEquals(HIGH_CARD, highCard.getCombination().getHandRanking(), "Expected hand ranking to be high card");
+        assertNotEquals(HIGH_CARD, notHighCard.getCombination().getHandRanking(), "Expected hand ranking to not be high card");
     }
 
     @Test
@@ -125,8 +136,8 @@ public class PokerHandTest {
         PokerHand onePair = new PokerHand("3C 3D JC QC AC");
         PokerHand notOnePair = new PokerHand("4S 5C 6H 8D 9S");
 
-        assertEquals(ONE_PAIR, onePair.getCombinationAtHand().getHandRanking(), "Expected hand ranking to be one pair");
-        assertNotEquals(ONE_PAIR, notOnePair.getCombinationAtHand().getHandRanking(), "Expected hand ranking to not be one pair");
+        assertEquals(ONE_PAIR, onePair.getCombination().getHandRanking(), "Expected hand ranking to be one pair");
+        assertNotEquals(ONE_PAIR, notOnePair.getCombination().getHandRanking(), "Expected hand ranking to not be one pair");
     }
 
     @Test
@@ -134,8 +145,8 @@ public class PokerHandTest {
         PokerHand twoPair = new PokerHand("4C 4D 9C 9D JC");
         PokerHand notTwoPair = new PokerHand("2C 4C 6C 8C TC");
 
-        assertEquals(TWO_PAIR, twoPair.getCombinationAtHand().getHandRanking(), "Expected hand ranking to be two pair");
-        assertNotEquals(TWO_PAIR, notTwoPair.getCombinationAtHand().getHandRanking(),  "Expected hand ranking to not be two pair");
+        assertEquals(TWO_PAIR, twoPair.getCombination().getHandRanking(), "Expected hand ranking to be two pair");
+        assertNotEquals(TWO_PAIR, notTwoPair.getCombination().getHandRanking(),  "Expected hand ranking to not be two pair");
     }
 
     @Test
@@ -143,8 +154,8 @@ public class PokerHandTest {
         PokerHand set = new PokerHand("KH KD KC JC QC");
         PokerHand notSet = new PokerHand("3C 5C 7C 9C KC");
 
-        assertEquals(SET, set.getCombinationAtHand().getHandRanking(), "Expected hand ranking to be a set");
-        assertNotEquals(SET, notSet.getCombinationAtHand().getHandRanking(), "Expected hand ranking to not be a set");
+        assertEquals(SET, set.getCombination().getHandRanking(), "Expected hand ranking to be a set");
+        assertNotEquals(SET, notSet.getCombination().getHandRanking(), "Expected hand ranking to not be a set");
     }
 
     @Test
@@ -153,9 +164,9 @@ public class PokerHandTest {
         PokerHand wheelStraight = new PokerHand("AC 2C 3D 4C 5S");
         PokerHand notStraight = new PokerHand("KC KD KH AC AS");
 
-        assertEquals(STRAIGHT, regularStraight.getCombinationAtHand().getHandRanking(), "Expected hand ranking to be straight");
-        assertEquals(STRAIGHT, wheelStraight.getCombinationAtHand().getHandRanking(), "Expected hand ranking to be straight");
-        assertNotEquals(STRAIGHT, notStraight.getCombinationAtHand().getHandRanking(), "Expected hand ranking to not be straight");
+        assertEquals(STRAIGHT, regularStraight.getCombination().getHandRanking(), "Expected hand ranking to be straight");
+        assertEquals(STRAIGHT, wheelStraight.getCombination().getHandRanking(), "Expected hand ranking to be straight");
+        assertNotEquals(STRAIGHT, notStraight.getCombination().getHandRanking(), "Expected hand ranking to not be straight");
     }
 
     @Test
@@ -163,8 +174,8 @@ public class PokerHandTest {
         PokerHand flush = new PokerHand("3C 5C 7C 9C KC");
         PokerHand notFlush = new PokerHand("5H 6S 7D 8C 9H");
 
-        assertEquals(FLUSH, flush.getCombinationAtHand().getHandRanking(), "Expected hand ranking to be a flush");
-        assertNotEquals(FLUSH, notFlush.getCombinationAtHand().getHandRanking(), "Expected hand ranking to not be a flush");
+        assertEquals(FLUSH, flush.getCombination().getHandRanking(), "Expected hand ranking to be a flush");
+        assertNotEquals(FLUSH, notFlush.getCombination().getHandRanking(), "Expected hand ranking to not be a flush");
     }
 
     @Test
@@ -173,9 +184,9 @@ public class PokerHandTest {
         PokerHand wheelStraightFlush = new PokerHand("AS 2S 3S 4S 5S");
         PokerHand notStraightFlush = new PokerHand("5H 6S 7D 8C 9H");
 
-        assertEquals(STRAIGHT_FLUSH, regularStraightFlush.getCombinationAtHand().getHandRanking(), "Expected hand ranking to be a straight flush");
-        assertEquals(STRAIGHT_FLUSH, wheelStraightFlush.getCombinationAtHand().getHandRanking(), "Expected hand ranking to be a straight flush");
-        assertNotEquals(STRAIGHT_FLUSH, notStraightFlush.getCombinationAtHand().getHandRanking(), "Expected hand ranking to not be a straight flush");
+        assertEquals(STRAIGHT_FLUSH, regularStraightFlush.getCombination().getHandRanking(), "Expected hand ranking to be a straight flush");
+        assertEquals(STRAIGHT_FLUSH, wheelStraightFlush.getCombination().getHandRanking(), "Expected hand ranking to be a straight flush");
+        assertNotEquals(STRAIGHT_FLUSH, notStraightFlush.getCombination().getHandRanking(), "Expected hand ranking to not be a straight flush");
     }
 
     @Test
@@ -183,8 +194,8 @@ public class PokerHandTest {
         PokerHand fullHouseHand = new PokerHand("3S 3H 3C 5D 5H");
         PokerHand notFullHouseHand = new PokerHand("3S 3H 4C 5D 5H");
 
-        assertEquals(FULL_HOUSE, fullHouseHand.getCombinationAtHand().getHandRanking(), "Expected hand ranking to be a full house");
-        assertNotEquals(FULL_HOUSE, notFullHouseHand.getCombinationAtHand().getHandRanking(), "Expected hand ranking to not be a full house");
+        assertEquals(FULL_HOUSE, fullHouseHand.getCombination().getHandRanking(), "Expected hand ranking to be a full house");
+        assertNotEquals(FULL_HOUSE, notFullHouseHand.getCombination().getHandRanking(), "Expected hand ranking to not be a full house");
     }
 
     @Test
@@ -192,8 +203,8 @@ public class PokerHandTest {
         PokerHand fourOfAKindHand = new PokerHand("7S 7H 7C 7D 2H");
         PokerHand notFourOfAKindHand = new PokerHand("7S 7H 7C 2D 2H");
 
-        assertEquals(FOUR_OF_A_KIND, fourOfAKindHand.getCombinationAtHand().getHandRanking(), "Expected hand ranking to be four of a kind");
-        assertNotEquals(FOUR_OF_A_KIND, notFourOfAKindHand.getCombinationAtHand().getHandRanking(), "Expected hand ranking to not be four of a kind");
+        assertEquals(FOUR_OF_A_KIND, fourOfAKindHand.getCombination().getHandRanking(), "Expected hand ranking to be four of a kind");
+        assertNotEquals(FOUR_OF_A_KIND, notFourOfAKindHand.getCombination().getHandRanking(), "Expected hand ranking to not be four of a kind");
     }
 
     @Test
@@ -201,8 +212,8 @@ public class PokerHandTest {
         PokerHand royalFlush = new PokerHand("AC KC QC JC TC");
         PokerHand notRoyalFlush = new PokerHand("AC KC QC JD TC");
 
-        assertEquals(ROYAL_FLUSH, royalFlush.getCombinationAtHand().getHandRanking(), "Expected hand ranking to be a royal flush");
-        assertNotEquals(ROYAL_FLUSH, notRoyalFlush.getCombinationAtHand().getHandRanking(), "Expected hand ranking to not be a royal flush");
+        assertEquals(ROYAL_FLUSH, royalFlush.getCombination().getHandRanking(), "Expected hand ranking to be a royal flush");
+        assertNotEquals(ROYAL_FLUSH, notRoyalFlush.getCombination().getHandRanking(), "Expected hand ranking to not be a royal flush");
     }
 }
 
