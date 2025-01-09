@@ -72,11 +72,11 @@ public class PokerHand implements Comparable<PokerHand> {
         return combination.getWeight();
     }
 
-    public TreeSet<Card> getCombinationCards(){
+    public List<Card> getCombinationCards(){
         return combination.getCombination();
     }
 
-    public TreeSet<Card> getKickerCards(){
+    public List<Card> getKickerCards(){
         return combination.getKickers();
     }
 

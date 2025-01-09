@@ -2,7 +2,7 @@ package texasholdem;
 
 import java.util.Comparator;
 import java.util.Iterator;
-import java.util.TreeSet;
+import java.util.List;
 
 public class PokerHandComparator implements Comparator<PokerHand> {
 
@@ -43,19 +43,19 @@ public class PokerHandComparator implements Comparator<PokerHand> {
      *         or 0 if both hands are the same based on their high cards and kickers.
      */
     private int compareByHighCards(PokerHand hand1, PokerHand hand2) {
-        TreeSet<Card> combination1 = hand1.getCombinationCards();
-        TreeSet<Card> combination2 = hand2.getCombinationCards();
+        List<Card> combination1 = hand1.getCombinationCards();
+        List<Card> combination2 = hand2.getCombinationCards();
 
         int comparison = compareCombinationsByIterator(combination2, combination1);
         if (comparison != 0) return comparison;
 
-        TreeSet<Card> kickers1 = hand1.getKickerCards();
-        TreeSet<Card> kickers2 = hand2.getKickerCards();
+        List<Card> kickers1 = hand1.getKickerCards();
+        List<Card> kickers2 = hand2.getKickerCards();
 
         return compareCombinationsByIterator(kickers2, kickers1);
     }
 
-    private Integer compareCombinationsByIterator(TreeSet<Card> combination1, TreeSet<Card> combination2) {
+    private Integer compareCombinationsByIterator(List<Card> combination1, List<Card> combination2) {
         Iterator<Card> it1 = combination1.iterator();
         Iterator<Card> it2 = combination2.iterator();
         while (it1.hasNext() && it2.hasNext()) {

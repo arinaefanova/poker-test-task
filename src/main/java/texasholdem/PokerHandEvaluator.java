@@ -1,6 +1,6 @@
 package texasholdem;
 import java.util.*;
-import java.util.TreeSet;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class PokerHandEvaluator {
@@ -127,25 +127,16 @@ public class PokerHandEvaluator {
      * @param pokerHand The poker hand to evaluate.
      * @return A list of map entries representing the combination (rank - position of the card)
      */
-    private TreeSet<Card> createCardList(Map<CardRank, Integer> rankCounts, Integer frequency, PokerHand pokerHand) {
-        TreeSet<Card> resultSet = new TreeSet<>(Comparator.reverseOrder());
-        pokerHand.getCards().stream()
+    private List<Card> createCardList(Map<CardRank, Integer> rankCounts, Integer frequency, PokerHand pokerHand) {
+        return pokerHand.getCards().stream()
                 .filter(card -> rankCounts.get(card.getRank()).equals(frequency))
-                .forEach(resultSet::add);
-        return resultSet;
+                .sorted(Comparator.reverseOrder())
+                .collect(Collectors.toList());
     }
 
-    private void sortWheelStraight(TreeSet<Card> combination) {
-        Set<Card> newCombination = new TreeSet<>(Comparator.reverseOrder());
-        for (Card card : combination) {
-            if (card.getRank() == CardRank.ACE) {
-                newCombination.add(new WheelStraightCard(card));
-            } else {
-                newCombination.add(card);
-            }
-        }
-        combination.clear();
-        combination.addAll(newCombination);
+    private void sortWheelStraight(List<Card> combination) {
+        combination.replaceAll(card -> card.getRank() == CardRank.ACE ? new WheelStraightCard(card) : card);
+        combination.sort(Collections.reverseOrder());
     }
 
     /**
@@ -158,8 +149,8 @@ public class PokerHandEvaluator {
      * @return A {@link Combination} object with the **HandRanking.HIGH_CARD**
      */
     private Combination assignHighCard(PokerHand pokerHand, Map<CardRank, Integer> rankCounts) {
-        TreeSet<Card> combination = new TreeSet<>();
-        TreeSet<Card> kickers =createCardList(rankCounts, RankFrequency.SINGLE, pokerHand);
+        List<Card> combination = Collections.emptyList();
+        List<Card> kickers = createCardList(rankCounts, RankFrequency.SINGLE, pokerHand);
         return new Combination(HandRanking.HIGH_CARD, combination, kickers);
     }
 
@@ -172,8 +163,8 @@ public class PokerHandEvaluator {
      * @return A {@link Combination} object with the **HandRanking.ONE_PAIR**.
      */
     private Combination assignOnePair(PokerHand pokerHand, Map<CardRank, Integer> rankCounts) {
-        TreeSet<Card> combination = createCardList(rankCounts, RankFrequency.PAIR, pokerHand);
-        TreeSet<Card> kickers = createCardList(rankCounts, RankFrequency.SINGLE, pokerHand);
+        List<Card> combination = createCardList(rankCounts, RankFrequency.PAIR, pokerHand);
+        List<Card> kickers = createCardList(rankCounts, RankFrequency.SINGLE, pokerHand);
         return new Combination(HandRanking.ONE_PAIR, combination, kickers);
     }
 
@@ -186,8 +177,8 @@ public class PokerHandEvaluator {
      * @return A {@link Combination} object with the **HandRanking.TWO_PAIR**
      */
     private Combination assignTwoPair(PokerHand pokerHand, Map<CardRank, Integer> rankCounts) {
-        TreeSet<Card> combination = createCardList(rankCounts, RankFrequency.PAIR, pokerHand);
-        TreeSet<Card> kickers = createCardList(rankCounts, RankFrequency.SINGLE, pokerHand);
+        List<Card> combination = createCardList(rankCounts, RankFrequency.PAIR, pokerHand);
+        List<Card> kickers = createCardList(rankCounts, RankFrequency.SINGLE, pokerHand);
         return new Combination(HandRanking.TWO_PAIR, combination, kickers);
     }
 
@@ -200,8 +191,8 @@ public class PokerHandEvaluator {
      * @return A {@link Combination} object with the **HandRanking.SET**
      */
     private Combination assignSet(PokerHand pokerHand, Map<CardRank, Integer> rankCounts) {
-        TreeSet<Card> combination = createCardList(rankCounts, RankFrequency.TRIPLE, pokerHand);
-        TreeSet<Card> kickers = createCardList(rankCounts, RankFrequency.SINGLE, pokerHand);
+        List<Card> combination = createCardList(rankCounts, RankFrequency.TRIPLE, pokerHand);
+        List<Card> kickers = createCardList(rankCounts, RankFrequency.SINGLE, pokerHand);
         return new Combination(HandRanking.SET, combination, kickers);
     }
 
@@ -215,8 +206,8 @@ public class PokerHandEvaluator {
      * @return A {@link Combination} object with the **HandRanking.STRAIGHT**
      */
     private Combination assignStraight(PokerHand pokerHand, Map<CardRank, Integer> rankCounts) {
-        TreeSet<Card> combination = createCardList(rankCounts, 1, pokerHand);
-        TreeSet<Card> kickers = new TreeSet<>();
+        List<Card> combination = createCardList(rankCounts, 1, pokerHand);
+        List<Card> kickers = Collections.emptyList();
         List<Integer> sequence = getSequence(pokerHand);
         if (sequence != null && sequence.equals(WHEEL_STRAIGHT_RANKS)) {
             sortWheelStraight(combination);
@@ -234,8 +225,8 @@ public class PokerHandEvaluator {
      * @return A {@link Combination} object with the **HandRanking.FLUSH**
      */
     private Combination assignFlush(PokerHand pokerHand, Map<CardRank, Integer> rankCounts) {
-        TreeSet<Card> combination = createCardList(rankCounts, RankFrequency.SINGLE, pokerHand);
-        TreeSet<Card> kickers = new TreeSet<>();
+        List<Card> combination = createCardList(rankCounts, RankFrequency.SINGLE, pokerHand);
+        List<Card> kickers = Collections.emptyList();
         return new Combination(HandRanking.FLUSH, combination, kickers);
     }
 
@@ -248,8 +239,8 @@ public class PokerHandEvaluator {
      * @return A {@link Combination} object with the **HandRanking.FULL_HOUSE**
      */
     private Combination assignFullHouse(PokerHand pokerHand, Map<CardRank, Integer> rankCounts) {
-        TreeSet<Card> combination = createCardList(rankCounts, RankFrequency.TRIPLE, pokerHand);
-        TreeSet<Card> kickers = createCardList(rankCounts, RankFrequency.PAIR, pokerHand);
+        List<Card> combination = createCardList(rankCounts, RankFrequency.TRIPLE, pokerHand);
+        List<Card> kickers = createCardList(rankCounts, RankFrequency.PAIR, pokerHand);
         return new Combination(HandRanking.FULL_HOUSE, combination, kickers);
     }
 
@@ -262,8 +253,8 @@ public class PokerHandEvaluator {
      * @return A {@link Combination} object with the **HandRanking.FOUR_OF_A_KIND**
      */
     private Combination assignFourOfAKind(PokerHand pokerHand, Map<CardRank, Integer> rankCounts) {
-        TreeSet<Card> combination = createCardList(rankCounts, RankFrequency.QUADRUPLE, pokerHand);
-        TreeSet<Card> kickers = createCardList(rankCounts, RankFrequency.SINGLE, pokerHand);
+        List<Card> combination = createCardList(rankCounts, RankFrequency.QUADRUPLE, pokerHand);
+        List<Card> kickers = createCardList(rankCounts, RankFrequency.SINGLE, pokerHand);
         return new Combination(HandRanking.FOUR_OF_A_KIND, combination, kickers);
     }
 
@@ -277,8 +268,8 @@ public class PokerHandEvaluator {
      * @return A {@link Combination} object with the **HandRanking.STRAIGHT_FLUSH**
      */
     private Combination assignStraightFlush(PokerHand pokerHand, Map<CardRank, Integer> rankCounts) {
-        TreeSet<Card> combination = createCardList(rankCounts, RankFrequency.SINGLE, pokerHand);
-        TreeSet<Card> kickers = new TreeSet<>();
+        List<Card> combination = createCardList(rankCounts, RankFrequency.SINGLE, pokerHand);
+        List<Card> kickers = Collections.emptyList();
         List<Integer> sequence = getSequence(pokerHand);
         if (sequence != null && sequence.equals(WHEEL_STRAIGHT_RANKS)) {
             sortWheelStraight(combination);
@@ -296,8 +287,8 @@ public class PokerHandEvaluator {
      * @return A {@link Combination} object with the **HandRanking.ROYAL_FLUSH**
      */
     private Combination assignRoyalFlush(PokerHand pokerHand, Map<CardRank, Integer> rankCounts) {
-        TreeSet<Card> combination = createCardList(rankCounts, RankFrequency.SINGLE, pokerHand);
-        TreeSet<Card> kickers = new TreeSet<>();
+        List<Card> combination = createCardList(rankCounts, RankFrequency.SINGLE, pokerHand);
+        List<Card> kickers = Collections.emptyList();
         return new Combination(HandRanking.ROYAL_FLUSH, combination, kickers);
     }
 }
