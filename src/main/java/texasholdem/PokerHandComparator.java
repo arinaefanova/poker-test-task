@@ -20,11 +20,11 @@ public class PokerHandComparator implements Comparator<PokerHand> {
      */
     @Override
     public int compare(PokerHand hand1, PokerHand hand2) {
-        int compareByCombination = hand2.getCombination().getWeight().compareTo(hand1.getCombination().getWeight());
+        int compareByCombination = hand2.getWeight().compareTo(hand1.getWeight());
         if (compareByCombination != 0) {
             return compareByCombination;
         }
-        boolean compareRoyalFlash = hand1.getCombination().getHandRanking() == HandRanking.ROYAL_FLUSH;
+        boolean compareRoyalFlash = hand1.isCombination(HandRanking.ROYAL_FLUSH);
         if (compareRoyalFlash) {
             return 0;
         }
@@ -43,14 +43,14 @@ public class PokerHandComparator implements Comparator<PokerHand> {
      *         or 0 if both hands are the same based on their high cards and kickers.
      */
     private int compareByHighCards(PokerHand hand1, PokerHand hand2) {
-        TreeSet<Card> combination1 = hand1.getCombination().getCombination();
-        TreeSet<Card> combination2 = hand2.getCombination().getCombination();
+        TreeSet<Card> combination1 = hand1.getCombinationCards();
+        TreeSet<Card> combination2 = hand2.getCombinationCards();
 
         int comparison = compareCombinationsByIterator(combination2, combination1);
         if (comparison != 0) return comparison;
 
-        TreeSet<Card> kickers1 = hand1.getCombination().getKickers();
-        TreeSet<Card> kickers2 = hand2.getCombination().getKickers();
+        TreeSet<Card> kickers1 = hand1.getKickerCards();
+        TreeSet<Card> kickers2 = hand2.getKickerCards();
 
         return compareCombinationsByIterator(kickers2, kickers1);
     }

@@ -64,6 +64,22 @@ public class PokerHand implements Comparable<PokerHand> {
         return combination;
     }
 
+    public boolean isCombination(HandRanking handRanking){
+        return combination.getHandRanking().equals(handRanking);
+    }
+
+    public Integer getWeight(){
+        return combination.getWeight();
+    }
+
+    public TreeSet<Card> getCombinationCards(){
+        return combination.getCombination();
+    }
+
+    public TreeSet<Card> getKickerCards(){
+        return combination.getKickers();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
